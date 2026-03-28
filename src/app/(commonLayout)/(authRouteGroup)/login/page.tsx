@@ -57,7 +57,7 @@ export default function LoginPage() {
           <CardHeader className="space-y-1 text-center">
             {/* You can replace this H1 with an actual <img src="/logo.png" /> later */}
             <CardTitle className="text-3xl font-bold tracking-tight text-primary">
-              AiMS Nation
+              AIMS Nation
             </CardTitle>
             <CardDescription>
               Enter your credentials to access your portal

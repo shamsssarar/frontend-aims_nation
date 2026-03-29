@@ -1,11 +1,16 @@
+
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/ui/app-sidebar";
+import { notFound } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { useSession } from "@/lib/authClient";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+
   return (
     <SidebarProvider>
       <AppSidebar />

@@ -7,7 +7,9 @@ import {
   Settings,
   LogOut,
   Briefcase,
+  GraduationCap,
 } from "lucide-react";
+import Link from "next/link";
 import { useSession, signOut } from "@/lib/authClient";
 import { useRouter } from "next/navigation";
 import {
@@ -24,12 +26,68 @@ import {
 } from "@/components/ui/sidebar";
 
 // Our navigation blueprint matching the backend APIs we built
-const items = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "My Courses", url: "/dashboard/courses", icon: BookOpen },
-  { title: "Payments", url: "/dashboard/Payments", icon: FileText },
-  { title: "Careers (ATS)", url: "/dashboard/careers", icon: Briefcase },
-  { title: "Settings", url: "/dashboard/settings", icon: Settings },
+const navItems = [
+  // 👉 Universal Links (Everyone sees these)
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: Home,
+    allowedRoles: ["STUDENT", "TEACHER", "ADMIN", "USER"],
+  },
+  {
+    title: "Settings",
+    url: "/dashboard/settings",
+    icon: Settings,
+    allowedRoles: ["STUDENT", "TEACHER", "ADMIN", "USER"],
+  },
+
+  // 👉 Student Links
+  {
+    title: "My Courses",
+    url: "/dashboard/my-courses",
+    icon: BookOpen,
+    allowedRoles: ["STUDENT", "USER"],
+  },
+  {
+    title: "My Invoices",
+    url: "/dashboard/invoices",
+    icon: FileText,
+    allowedRoles: ["STUDENT", "USER"],
+  },
+
+  // 👉 Teacher Links
+  {
+    title: "My Classes",
+    url: "/teacher/dashboard/classes",
+    icon: GraduationCap,
+    allowedRoles: ["TEACHER"],
+  },
+  {
+    title: "Upload Materials",
+    url: "/dashboard/teacher/materials",
+    icon: FileText,
+    allowedRoles: ["TEACHER"],
+  },
+
+  // 👉 Admin Links (The Command Center)
+  {
+    title: "Manage Courses",
+    url: "/dashboard/admin/courses",
+    icon: BookOpen,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    title: "Financial Hub",
+    url: "/dashboard/admin/financials",
+    icon: FileText,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    title: "Careers (ATS)",
+    url: "/dashboard/admin/careers",
+    icon: Briefcase,
+    allowedRoles: ["ADMIN"],
+  },
 ];
 
 export function AppSidebar() {
@@ -39,6 +97,19 @@ export function AppSidebar() {
   const handleLogout = async () => {
     await signOut();
     router.push("/login");
+  };
+
+  const userRole = (session?.user as any)?.role?.toUpperCase() || "STUDENT";
+
+  // Only keep the links where the user's role exists in the allowedRoles array
+  const filteredItems = navItems.filter((item) =>
+    item.allowedRoles.includes(userRole),
+  );
+
+  const getHomeUrl = () => {
+    if (userRole === "TEACHER") return "/teacher/dashboard";
+    if (userRole === "ADMIN") return "/admin/dashboard";
+    return "/dashboard"; // Default for students
   };
 
   return (
@@ -56,13 +127,14 @@ export function AppSidebar() {
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              
+              {filteredItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -75,6 +147,9 @@ export function AppSidebar() {
           <div className="px-2 text-sm">
             <p className="font-semibold text-foreground truncate">
               {session?.user?.name || "Loading..."}
+            </p>
+            <p className="text-xs truncate uppercase font-medium text-primary">
+              {userRole}
             </p>
             <p className="text-xs text-muted-foreground truncate">
               {session?.user?.email}

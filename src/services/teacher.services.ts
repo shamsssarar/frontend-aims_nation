@@ -7,4 +7,8 @@ export const teacherService = {
   getMyClasses: async () => {
     return httpClient.get<TeacherCourse[]>("/api/v1/teachers/my-classes");
   },
+  getAllTeachers: async () => {
+    const response = await httpClient.get("/api/v1/teachers");
+    return response;
+  },
 };

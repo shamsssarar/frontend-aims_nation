@@ -13,6 +13,23 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -34,6 +51,8 @@ import {
 import { materialService } from "@/services/material.services";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { courseService } from "@/services/courses.services";
+import { weeklyReportService } from "@/services/weekyReports.services";
 
 // --- DUMMY DATA (We will replace this with real API calls next!) ---
 const DUMMY_COURSE = {
@@ -78,6 +97,17 @@ export default function ClassControlCenter() {
   const [isUploading, setIsUploading] = useState(false);
   const [materials, setMaterials] = useState<any[]>([]);
   const [isLoadingMaterials, setIsLoadingMaterials] = useState(true);
+  const [roster, setRoster] = useState<any[]>([]);
+  const [isLoadingRoster, setIsLoadingRoster] = useState(true);
+  const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [reportForm, setReportForm] = useState({
+    behaviorStatus: "NORMAL",
+    daysPresent: "1",
+    daysAbsent: "0",
+    teacherComments: "",
+  });
 
   const fetchMaterials = async () => {
     setIsLoadingMaterials(true);
@@ -93,6 +123,24 @@ export default function ClassControlCenter() {
 
   useEffect(() => {
     fetchMaterials();
+  }, [courseId]);
+
+  const fetchRoster = async () => {
+    setIsLoadingRoster(true);
+    try {
+      const res = await courseService.getCourseRoster(courseId as string);
+
+      setRoster(Array.isArray(res) ? res : []);
+    } catch (error) {
+      console.error("Failed to fetch roster:", error);
+    } finally {
+      setIsLoadingRoster(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMaterials();
+    fetchRoster();
   }, [courseId]);
 
   const handleUpload = async () => {
@@ -139,6 +187,40 @@ export default function ClassControlCenter() {
     } catch (error) {
       console.error("Delete failed:", error);
       alert("Failed to delete material.");
+    }
+  };
+
+  const handleReportSubmit = async () => {
+    if (!selectedStudent) return;
+
+    setIsSubmittingReport(true);
+    try {
+      // NOTE: We will build this backend route next!
+      const payload = {
+        courseId: courseId as string,
+        studentId: selectedStudent.studentId,
+        behaviorStatus: reportForm.behaviorStatus,
+        daysPresent: Number(reportForm.daysPresent),
+        daysAbsent: Number(reportForm.daysAbsent),
+        teacherComments:
+          reportForm.teacherComments.trim() === ""
+            ? undefined
+            : reportForm.teacherComments,
+        weekStartDate: new Date().toISOString(), // Just the date part, e.g. "2024-10-07"
+      };
+
+      await weeklyReportService.submitWeeklyReport(payload);
+      alert(`Report submitted for ${selectedStudent.name}!`);
+
+      // Refresh the roster to change their status from "Pending" to today's date
+      fetchRoster();
+
+      // Close modal (shadcn handles this via state or you can wrap in a controlled Dialog)
+    } catch (error) {
+      console.error(error);
+      alert("Failed to submit report.");
+    } finally {
+      setIsSubmittingReport(false);
     }
   };
 
@@ -358,36 +440,181 @@ export default function ClassControlCenter() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {DUMMY_STUDENTS.map((student) => (
-                    <TableRow key={student.id}>
-                      <TableCell className="font-medium">
-                        {student.name}
-                      </TableCell>
-                      <TableCell>
-                        <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-50 text-green-700 border-green-200">
-                          {student.status}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {student.lastReport === "Pending" ? (
-                          <span className="text-amber-600 font-medium flex items-center">
-                            <PenSquare className="mr-1 h-3 w-3" /> Due Today
-                          </span>
-                        ) : (
-                          student.lastReport
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="outline" size="sm">
-                          Write Report
-                        </Button>
+                  {isLoadingRoster ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-24 text-center">
+                        <Loader2 className="animate-spin h-6 w-6 text-primary mx-auto" />
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : roster.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={4}
+                        className="h-24 text-center text-muted-foreground"
+                      >
+                        No students enrolled in this class yet.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    roster.map((student) => (
+                      <TableRow key={student.enrollmentId}>
+                        <TableCell className="font-medium">
+                          {student.name}
+                        </TableCell>
+                        <TableCell>
+                          <span
+                            className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
+                              student.status === "ACTIVE"
+                                ? "bg-green-50 text-green-700 border-green-200"
+                                : "bg-red-50 text-red-700 border-red-200"
+                            }`}
+                          >
+                            {student.status}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {student.lastReport === "Pending" ? (
+                            <span className="text-amber-600 font-medium flex items-center">
+                              <PenSquare className="mr-1 h-3 w-3" /> Due This
+                              Week
+                            </span>
+                          ) : (
+                            <span className="text-green-600 font-medium">
+                              {student.lastReport}
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {/* 👉 1. THE FIX: Just a simple button. No Dialog here! */}
+                          {student.lastReport === "Pending" ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedStudent(student);
+                                setReportForm({
+                                  behaviorStatus: "NORMAL",
+                                  daysPresent: "1",
+                                  daysAbsent: "0",
+                                  teacherComments: "",
+                                });
+                                setIsReportModalOpen(true); // This opens the master modal safely
+                              }}
+                            >
+                              Write Report
+                            </Button>
+                          ) : (
+                            <span className="text-sm text-muted-foreground font-medium">
+                              Done ✅
+                            </span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
+          {/* 👉 2. THE MASTER MODAL: Placed safely OUTSIDE the table loop! */}
+          <Dialog open={isReportModalOpen} onOpenChange={setIsReportModalOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>
+                  Weekly Report: {selectedStudent?.name}
+                </DialogTitle>
+                <DialogDescription>
+                  Submit the performance report for this week.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="grid gap-4 py-4">
+                <div className="space-y-2">
+                  <Label>Behavior & Engagement</Label>
+                  <Select
+                    defaultValue={reportForm.behaviorStatus}
+                    onValueChange={(val) =>
+                      setReportForm({
+                        ...reportForm,
+                        behaviorStatus: val,
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="EXCEPTIONAL">Exceptional</SelectItem>
+                      <SelectItem value="NORMAL">Normal / Good</SelectItem>
+                      <SelectItem value="NEEDS_ATTENTION">
+                        Needs Attention
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Days Present</Label>
+                    <Input
+                      type="number"
+                      value={reportForm.daysPresent}
+                      onChange={(e) =>
+                        setReportForm({
+                          ...reportForm,
+                          daysPresent: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Days Absent</Label>
+                    <Input
+                      type="number"
+                      value={reportForm.daysAbsent}
+                      onChange={(e) =>
+                        setReportForm({
+                          ...reportForm,
+                          daysAbsent: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Teacher Comments (Optional)</Label>
+                  <Textarea
+                    placeholder="Add any specific notes about their progress this week..."
+                    value={reportForm.teacherComments}
+                    onChange={(e) =>
+                      setReportForm({
+                        ...reportForm,
+                        teacherComments: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  onClick={handleReportSubmit}
+                  disabled={isSubmittingReport}
+                  className="w-full"
+                >
+                  {isSubmittingReport ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                      Submitting...
+                    </>
+                  ) : (
+                    "Save Report"
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
       </Tabs>
     </div>

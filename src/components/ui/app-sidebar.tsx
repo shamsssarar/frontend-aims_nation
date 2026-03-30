@@ -24,6 +24,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { title } from "process";
 
 // Our navigation blueprint matching the backend APIs we built
 const navItems = [
@@ -72,22 +73,34 @@ const navItems = [
   // 👉 Admin Links (The Command Center)
   {
     title: "Manage Courses",
-    url: "/dashboard/admin/courses",
+    url: "/admin/dashboard/courses-management",
     icon: BookOpen,
     allowedRoles: ["ADMIN"],
   },
   {
     title: "Financial Hub",
-    url: "/dashboard/admin/financials",
+    url: "/admin/dashboard/financials-management",
     icon: FileText,
     allowedRoles: ["ADMIN"],
   },
   {
     title: "Careers (ATS)",
-    url: "/dashboard/admin/careers",
+    url: "/admin/dashboard/careers-management",
     icon: Briefcase,
     allowedRoles: ["ADMIN"],
   },
+  {
+    title: "teacher management",
+    url: "/admin/dashboard/teacher-management",
+    icon: Settings,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    title: "Hire Teacher",
+    url: "/admin/dashboard/hire-teacher",
+    icon: Briefcase,
+    allowedRoles: ["ADMIN"],
+  }
 ];
 
 export function AppSidebar() {
@@ -127,7 +140,6 @@ export function AppSidebar() {
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              
               {filteredItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>

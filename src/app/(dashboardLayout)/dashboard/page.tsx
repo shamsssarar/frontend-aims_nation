@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "@/lib/authClient";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Loader2, BookX, GraduationCap, Compass, Clock } from "lucide-react";
 import { enrollmentService } from "@/services/enrollment.services";
 import { paymentService } from "@/services/payment.services";
 import { useRouter } from "next/navigation";
-
 
 export default function DashboardPage() {
   const { data: session, isPending: isAuthPending } = useSession();
@@ -21,7 +21,7 @@ export default function DashboardPage() {
 
   const router = useRouter();
 
-useEffect(() => {
+  useEffect(() => {
     // 1. Wait for better-auth to finish loading the session state
     if (isAuthPending) return;
 
@@ -67,7 +67,7 @@ useEffect(() => {
     };
 
     fetchDashboardData();
-  }, [session, isAuthPending]); // Add isAuthPending to the dependency array! // This array means: "Run this effect whenever the session changes"
+  }, [session, isAuthPending, router]);
 
   // Show a loading state while auth or data is loading
   if (isAuthPending || isFetchingData) {
@@ -79,9 +79,11 @@ useEffect(() => {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-8 max-w-5xl mx-auto p-4 md:p-6">
+      {/* HEADER */}
       <div>
-        <h2 className="text-3xl font-bold tracking-tight text-foreground">
+        <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center">
+          <GraduationCap className="mr-3 h-8 w-8 text-indigo-600" />
           Welcome back, {session?.user?.name?.split(" ")[0] || "Student"}! 👋
         </h2>
         <p className="text-muted-foreground mt-2">
@@ -89,6 +91,7 @@ useEffect(() => {
         </p>
       </div>
 
+      {/* KPI CARDS */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="border-t-4 border-t-primary shadow-sm">
           <CardHeader className="pb-2">
@@ -103,7 +106,7 @@ useEffect(() => {
           </CardContent>
         </Card>
 
-        <Card className="border-t-4 border-t-secondary shadow-sm">
+        <Card className="border-t-4 border-t-amber-500 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Pending Payments
@@ -114,8 +117,8 @@ useEffect(() => {
               {pendingPaymentsCount}
             </div>
             {pendingPaymentsCount > 0 && (
-              <p className="text-xs text-secondary font-medium mt-1">
-                Requires action
+              <p className="text-xs text-amber-600 font-medium mt-1">
+                Awaiting Admin Verification
               </p>
             )}
           </CardContent>
@@ -132,6 +135,56 @@ useEffect(() => {
             <p className="text-xs text-muted-foreground mt-1">Coming soon</p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* DYNAMIC CLASSROOM SECTION */}
+      <div className="space-y-4 pt-4">
+        <h2 className="text-2xl font-semibold tracking-tight">My Classroom</h2>
+        
+        {activeCoursesCount === 0 && pendingPaymentsCount === 0 ? (
+          /* STATE 1: BRAND NEW STUDENT (NO COURSES, NO PAYMENTS) */
+          <Card className="border-dashed border-2 bg-slate-50/50">
+            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="bg-indigo-100 p-4 rounded-full mb-4">
+                <BookX className="h-10 w-10 text-indigo-600" />
+              </div>
+              <CardTitle className="text-xl mb-2">Your classroom is currently empty</CardTitle>
+              <CardDescription className="max-w-md mx-auto mb-6">
+                You haven't enrolled in any courses yet. Once you enroll and your payment is verified, your study materials, live classes, and assignments will appear right here.
+              </CardDescription>
+              <Button 
+                onClick={() => router.push('/courses')} 
+                className="bg-indigo-600 hover:bg-indigo-700"
+              >
+                <Compass className="mr-2 h-4 w-4" /> Explore Available Courses
+              </Button>
+            </CardContent>
+          </Card>
+        ) : activeCoursesCount === 0 && pendingPaymentsCount > 0 ? (
+          /* STATE 2: PAYMENT SUBMITTED, WAITING FOR ADMIN APPROVAL */
+          <Card className="border-amber-200 bg-amber-50/50 shadow-sm">
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="bg-amber-100 p-4 rounded-full mb-4">
+                <Clock className="h-10 w-10 text-amber-600" />
+              </div>
+              <CardTitle className="text-xl mb-2 text-amber-900">Payment Verification in Progress</CardTitle>
+              <CardDescription className="max-w-md mx-auto text-amber-700">
+                We have received your enrollment request! Our admins are currently verifying your payment. Your course materials will unlock automatically once approved.
+              </CardDescription>
+            </CardContent>
+          </Card>
+        ) : (
+          /* STATE 3: UNLOCKED COURSES (We will build the actual course cards here later) */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card className="border-indigo-100 bg-indigo-50/30">
+              <CardContent className="p-6">
+                <h3 className="font-bold text-lg mb-2">My Active Courses</h3>
+                <p className="text-sm text-muted-foreground mb-4">You have {activeCoursesCount} unlocked courses. We will display your study modules here next!</p>
+                <Button variant="outline" className="w-full">View Course Content</Button>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );

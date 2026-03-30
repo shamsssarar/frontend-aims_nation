@@ -11,4 +11,12 @@ export const teacherService = {
     const response = await httpClient.get("/api/v1/teachers");
     return response;
   },
+  // 👉 Add this to your service file
+  updateTeacher: async (teacherId: string, payload: any) => {
+    const response = await httpClient.patch(
+      `/api/v1/teachers/${teacherId}`,
+      payload,
+    );
+    return response;
+  },
 };

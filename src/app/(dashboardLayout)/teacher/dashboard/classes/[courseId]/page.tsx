@@ -518,7 +518,7 @@ export default function ClassControlCenter() {
           </Card>
           {/* 👉 2. THE MASTER MODAL: Placed safely OUTSIDE the table loop! */}
           <Dialog open={isReportModalOpen} onOpenChange={setIsReportModalOpen}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-106.25">
               <DialogHeader>
                 <DialogTitle>
                   Weekly Report: {selectedStudent?.name}

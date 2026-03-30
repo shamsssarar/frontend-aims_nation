@@ -137,7 +137,7 @@ export default function CoursesManagementPage() {
               <Plus className="mr-2 h-4 w-4" /> Create Course
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-106.25">
             <DialogHeader>
               <DialogTitle>Create New Course</DialogTitle>
               <DialogDescription>
@@ -187,7 +187,7 @@ export default function CoursesManagementPage() {
                   </SelectTrigger>
 
                   {/* 👉 THE FIX: z-[9999] forces it to the absolute front layer! */}
-                  <SelectContent className="z-[9999]">
+                  <SelectContent className="z-9999">
                     {teachers && teachers.length > 0 ? (
                       teachers.map((teacher) => (
                         <SelectItem key={teacher.id} value={teacher.id}>
@@ -302,7 +302,8 @@ export default function CoursesManagementPage() {
                   <TableCell>
                     {/* Assuming your backend includes the teacher data. If it's just an ID, we can cross-reference the teachers array! */}
                     {course.teacher?.user?.name ||
-                      teachers.find((t) => t.id === course.teacherApplicantId)?.name ||
+                      teachers.find((t) => t.id === course.teacherApplicantId)
+                        ?.name ||
                       "Unassigned"}
                   </TableCell>
                   <TableCell>{course.maxCapacity}</TableCell>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { teacherService } from "@/services/teacher.services"; // Adjust path if needed
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { adminService } from "@/services/admin.services";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -12,7 +12,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Loader2,
+  Search,
+  GraduationCap,
+  Mail,
+  Phone,
+  Edit,
+  UserCircle,
+} from "lucide-react";
+import { studentServices } from "@/services/student.services";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,101 +31,93 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Loader2,
-  Search,
-  Briefcase,
-  Mail,
-  Phone,
-  Edit,
-  Banknote,
-  BookOpen,
-} from "lucide-react";
+import { Label } from "@/components/ui/label";
 
-export default function TeachersManagementPage() {
-  const [teachers, setTeachers] = useState<any[]>([]);
+export default function StudentsManagementPage() {
+  const [students, setStudents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Edit Modal States
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [editingTeacher, setEditingTeacher] = useState({
+  const [editingStudent, setEditingStudent] = useState({
     id: "",
     name: "",
     contactNo: "",
-    salary: "",
+    bloodGroup: "",
   });
 
-  const fetchTeachers = async () => {
+  const fetchStudents = async () => {
     setIsLoading(true);
     try {
-      // Assuming this fetches ALL teachers. If your backend puts the data in res.data.data, adjust accordingly!
-      const res = await teacherService.getAllTeachers();
+      const res = await studentServices.getAllStudents();
       const data = (res as any)?.data?.data || (res as any)?.data || res || [];
-      setTeachers(data);
+      setStudents(data);
     } catch (error) {
-      console.error("Failed to fetch teachers:", error);
+      console.error("Failed to fetch students:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTeachers();
+    fetchStudents();
   }, []);
 
-  const handleOpenEdit = (teacher: any) => {
-    setEditingTeacher({
-      id: teacher.id,
-      name: teacher.user?.name || teacher.name || "Unknown",
-      contactNo: teacher.contactNo || "",
-      salary: teacher.salary ? teacher.salary.toString() : "",
+  const handleOpenEdit = (student: any) => {
+    setEditingStudent({
+      id: student.id,
+      name: student.name,
+      contactNo:
+        Number(student.contactNo) !== Number("N/A")
+          ? student.contactNo
+          : Number(""),
+      bloodGroup: student.bloodGroup !== "N/A" ? student.bloodGroup : "",
     });
     setIsEditModalOpen(true);
   };
 
+  // Submit the update to the backend
   const handleSaveUpdate = async () => {
     setIsUpdating(true);
     try {
       const payload = {
-        contactNo: editingTeacher.contactNo,
-        salary: Number(editingTeacher.salary),
+        contactNo: editingStudent.contactNo,
+        bloodGroup: editingStudent.bloodGroup,
       };
 
-      await teacherService.updateTeacher(editingTeacher.id, payload);
-      alert("Teacher profile updated successfully!");
+      await studentServices.updateStudent(editingStudent.id, payload);
+      alert("Student profile updated successfully!");
 
       setIsEditModalOpen(false);
-      fetchTeachers(); // Refresh the table to show new data
+      fetchStudents(); // Refresh the table
     } catch (error) {
       console.error("Update failed:", error);
-      alert("Failed to update teacher profile.");
+      alert("Failed to update student profile.");
     } finally {
       setIsUpdating(false);
     }
   };
 
   // Instant Search Filter
-  const filteredTeachers = teachers.filter((teacher) => {
+  const filteredStudents = students.filter((student) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
-    const name = teacher.user?.name || teacher.name || "";
-    const email = teacher.user?.email || teacher.email || "";
     return (
-      name.toLowerCase().includes(query) || email.toLowerCase().includes(query)
+      student.name?.toLowerCase().includes(query) ||
+      student.email?.toLowerCase().includes(query)
     );
   });
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Teacher Directory
+            Student Directory
           </h1>
           <p className="text-muted-foreground mt-2">
-            Manage your academic staff, update salaries, and maintain bios.
+            View and search the master roster of all enrolled learners.
           </p>
         </div>
       </div>
@@ -128,7 +129,7 @@ export default function TeachersManagementPage() {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search by name or email..."
+                placeholder="Search students by name or email..."
                 className="pl-8"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -141,11 +142,10 @@ export default function TeachersManagementPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Teacher Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Salary</TableHead>
+                <TableHead>Student Name</TableHead>
+                <TableHead>Account Email</TableHead>
                 <TableHead>Contact No.</TableHead>
-                <TableHead className="text-right">Action</TableHead>
+                <TableHead>Blood Group</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -155,43 +155,47 @@ export default function TeachersManagementPage() {
                     <Loader2 className="animate-spin h-8 w-8 text-primary mx-auto" />
                   </TableCell>
                 </TableRow>
-              ) : filteredTeachers.length === 0 ? (
+              ) : filteredStudents.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={4}
                     className="h-32 text-center text-muted-foreground"
                   >
-                    <Briefcase className="h-10 w-10 text-slate-200 mx-auto mb-2" />
-                    No teachers found.
+                    <GraduationCap className="h-10 w-10 text-slate-200 mx-auto mb-2" />
+                    No students found.
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredTeachers.map((teacher) => (
-                  <TableRow key={teacher.id}>
+                filteredStudents.map((student) => (
+                  <TableRow key={student.id}>
                     <TableCell className="font-medium flex items-center gap-2">
                       <div className="bg-indigo-100 p-2 rounded-full text-indigo-700">
-                        <Briefcase className="h-4 w-4" />
+                        <GraduationCap className="h-4 w-4" />
                       </div>
-                      {teacher.user?.name || teacher.name || "Unknown"}
+                      {student.name}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center text-muted-foreground text-sm">
                         <Mail className="h-3 w-3 mr-2" />
-                        {teacher.user?.email || teacher.email || "N/A"}
+                        {student.email}
                       </div>
                     </TableCell>
-                    <TableCell className="font-semibold text-slate-700">
-                      ৳ {teacher.salary?.toLocaleString() || "0"}
+                    <TableCell className="text-sm">
+                      <div className="flex items-center text-muted-foreground">
+                        <Phone className="h-3 w-3 mr-2" />
+                        {student.contactNo || "N/A"}
+                      </div>
                     </TableCell>
-                    <TableCell className="font-semibold text-slate-700">
-                      {teacher.contactNo || "N/A"}
+                    <TableCell className="text-sm">
+                      {student.bloodGroup || "N/A"}
                     </TableCell>
                     <TableCell className="text-right">
+                      {/* 👉 THE EDIT BUTTON */}
                       <Button
                         variant="ghost"
                         size="sm"
                         className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50"
-                        onClick={() => handleOpenEdit(teacher)}
+                        onClick={() => handleOpenEdit(student)}
                       >
                         <Edit className="h-4 w-4 mr-1" /> Edit
                       </Button>
@@ -203,31 +207,29 @@ export default function TeachersManagementPage() {
           </Table>
         </CardContent>
       </Card>
-
-      {/* THE EDIT MODAL */}
+      {/* 👉 THE EDIT MODAL */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
-            <DialogTitle>Edit Teacher Profile</DialogTitle>
+            <DialogTitle>Edit Student Profile</DialogTitle>
             <DialogDescription>
-              Update details for {editingTeacher.name}.
+              Update contact information for {editingStudent.name}.
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
-              <Label>Monthly Salary (৳)</Label>
+              <Label> Blood Group</Label>
               <div className="relative">
-                <Banknote className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <UserCircle className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  type="number"
-                  placeholder="e.g. 20000"
+                  placeholder="e.g. Martha Kent"
                   className="pl-8"
-                  value={editingTeacher.salary}
+                  value={editingStudent.bloodGroup}
                   onChange={(e) =>
-                    setEditingTeacher({
-                      ...editingTeacher,
-                      salary: e.target.value,
+                    setEditingStudent({
+                      ...editingStudent,
+                      bloodGroup: e.target.value,
                     })
                   }
                 />
@@ -239,12 +241,12 @@ export default function TeachersManagementPage() {
               <div className="relative">
                 <Phone className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="e.g. 01711..."
+                  placeholder="e.g. +880 1711..."
                   className="pl-8"
-                  value={editingTeacher.contactNo}
+                  value={editingStudent.contactNo}
                   onChange={(e) =>
-                    setEditingTeacher({
-                      ...editingTeacher,
+                    setEditingStudent({
+                      ...editingStudent,
                       contactNo: e.target.value,
                     })
                   }

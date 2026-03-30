@@ -90,8 +90,8 @@ const navItems = [
     allowedRoles: ["ADMIN"],
   },
   {
-    title: "teacher management",
-    url: "/admin/dashboard/teacher-management",
+    title: "Teacher Management",
+    url: "/admin/dashboard/teachers-management",
     icon: Settings,
     allowedRoles: ["ADMIN"],
   },
@@ -100,7 +100,13 @@ const navItems = [
     url: "/admin/dashboard/hire-teacher",
     icon: Briefcase,
     allowedRoles: ["ADMIN"],
-  }
+  },
+  {
+    title: "Student Management",
+    url: "/admin/dashboard/students-management",
+    icon: GraduationCap,
+    allowedRoles: ["ADMIN"],
+  },
 ];
 
 export function AppSidebar() {

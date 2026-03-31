@@ -23,6 +23,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { title } from "process";
 
@@ -51,7 +52,7 @@ const navItems = [
   },
   {
     title: "My Invoices",
-    url: "/dashboard/invoices",
+    url: "/dashboard/my-invoices",
     icon: FileText,
     allowedRoles: ["STUDENT", "USER"],
   },
@@ -65,7 +66,7 @@ const navItems = [
   },
   {
     title: "Upload Materials",
-    url: "/dashboard/teacher/materials",
+    url: "/teacher/dashboard/materials",
     icon: FileText,
     allowedRoles: ["TEACHER"],
   },
@@ -112,6 +113,7 @@ const navItems = [
 export function AppSidebar() {
   const router = useRouter();
   const { data: session } = useSession();
+  const { setOpenMobile } = useSidebar();
 
   const handleLogout = async () => {
     await signOut();
@@ -149,7 +151,7 @@ export function AppSidebar() {
               {filteredItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link href={item.url}>
+                    <Link href={item.url} onClick={() => setOpenMobile(false)}>
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>

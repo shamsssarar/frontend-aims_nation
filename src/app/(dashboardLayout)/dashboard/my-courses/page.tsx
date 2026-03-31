@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "@/lib/authClient";
 import { enrollmentService } from "@/services/enrollment.services";
+import { paymentService } from "@/services/payment.services"; // 👉 Imported the payment service!
 import { Enrollment } from "@/types/Enrollment.types";
 import {
   Card,
@@ -13,50 +14,57 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, BookOpen, Clock, ArrowRight } from "lucide-react";
+import { Loader2, BookOpen, Clock, ArrowRight, Lock } from "lucide-react"; // 👉 Added Lock icon
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { CourseMaterialsSheet } from "@/components/ui/courseMaterialsSheet";
 
 export default function MyCoursesPage() {
   const { data: session, isPending: isAuthPending } = useSession();
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  
+  // 👉 Split state into Active and Pending
+  const [activeEnrollments, setActiveEnrollments] = useState<Enrollment[]>([]);
+  const [pendingCourses, setPendingCourses] = useState<any[]>([]);
+  
   const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [selectedCourseTitle, setSelectedCourseTitle] = useState("");
 
-  console.log("1. [Render] Component rendered. Current state:", enrollments);
-
   useEffect(() => {
-    // 1. Wait for better-auth to finish its background checks
-    console.log("2. [Effect] useEffect triggered by pathname:", pathname);
     if (isAuthPending) return;
 
-    // 2. If auth is done, but somehow no user is found, stop the spinner
     if (!session?.user?.id) {
       setIsLoading(false);
       return;
     }
 
-    // 3. The Cleanup Flag (Crucial for Next.js Back Button caching!)
     let isMounted = true;
 
-    const fetchMyCourses = async () => {
+    const fetchMyCoursesData = async () => {
       try {
         setIsLoading(true);
-        const data = await enrollmentService.getMyEnrollments();
-        console.log("3. [API Success] Data received:", data);
+        
+        // 👉 Fetch BOTH enrollments and payments, just like the dashboard!
+        const [enrollmentsRes, paymentsRes] = await Promise.all([
+          enrollmentService.getMyEnrollments(),
+          paymentService.getMyPayments(),
+        ]);
 
-        // Only update state if the user hasn't quickly navigated away again
         if (isMounted) {
-          console.log("3. [API Success] Data received:", data);
-          setEnrollments(data);
+          const enrollments = (enrollmentsRes as any)?.data?.data || (enrollmentsRes as any)?.data || enrollmentsRes || [];
+          const payments = (paymentsRes as any)?.data?.data || (paymentsRes as any)?.data || paymentsRes || [];
+
+          // Filter out exactly what we need
+          const active = enrollments.filter((e: any) => e.status === "ACTIVE");
+          const pending = payments.filter((p: any) => p.status === "PENDING");
+
+          setActiveEnrollments(active);
+          setPendingCourses(pending);
         }
       } catch (error) {
-        console.error("4. [API Error] Failed:", error);
-        console.error("Failed to fetch courses:", error);
+        console.error("Failed to fetch courses data:", error);
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -64,14 +72,11 @@ export default function MyCoursesPage() {
       }
     };
 
-    fetchMyCourses();
+    fetchMyCoursesData();
 
-    // 4. Cleanup function runs when component unmounts (e.g. clicking 'Back')
     return () => {
       isMounted = false;
     };
-
-    // 👉 Primitive dependencies only! React tracks strings perfectly.
   }, [session?.user?.id, isAuthPending]);
 
   if (isAuthPending || isLoading) {
@@ -82,16 +87,8 @@ export default function MyCoursesPage() {
     );
   }
 
-  // Check for null (Fetching state)
-  // if (enrollments === null) {
-  //   return (
-  //     <div className="flex h-[60vh] items-center justify-center">
-  //       <Loader2 className="h-8 w-8 animate-spin text-primary" />
-  //     </div>
-  //   );
-  // }
-  // 👉 STEP 4: The Empty State
-  if (enrollments.length === 0) {
+  // 👉 The Empty State only shows if BOTH active and pending are zero
+  if (activeEnrollments.length === 0 && pendingCourses.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4 animate-in fade-in duration-500">
         <div className="h-24 w-24 bg-primary/10 rounded-full flex items-center justify-center mb-2">
@@ -114,7 +111,6 @@ export default function MyCoursesPage() {
     );
   }
 
-  // 👉 STEP 2: The Active Courses Grid
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div>
@@ -127,9 +123,11 @@ export default function MyCoursesPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {enrollments.map((enrollment, index) => (
+        
+        {/* 👉 1. MAP THROUGH ACTIVE COURSES (Normal styling) */}
+        {activeEnrollments.map((enrollment, index) => (
           <motion.div
-            key={enrollment.id}
+            key={`active-${enrollment.id}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
@@ -137,29 +135,28 @@ export default function MyCoursesPage() {
             <Card className="flex flex-col h-full border-t-4 border-t-primary hover:shadow-md transition-all duration-200">
               <CardHeader>
                 <CardTitle className="line-clamp-2 text-xl">
-                  {enrollment.course.title}
+                  {enrollment.course?.title || "Course Name"}
                 </CardTitle>
                 <CardDescription className="line-clamp-2 mt-2">
-                  {enrollment.course.description ||
+                  {enrollment.course?.description ||
                     "Dive into the curriculum and explore the advanced techniques offered in this module."}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-1">
-                <div className="flex items-center text-sm text-muted-foreground bg-muted p-2 rounded-md w-fit border border-border">
-                  <Clock className="mr-2 h-4 w-4 text-secondary" />
+                <div className="flex items-center text-sm text-muted-foreground bg-primary/10 p-2 rounded-md w-fit border border-primary/20">
+                  <BookOpen className="mr-2 h-4 w-4 text-primary" />
                   Status:{" "}
-                  <span className="font-semibold ml-1 text-foreground">
-                    {enrollment.status}
+                  <span className="font-semibold ml-1 text-primary">
+                    ACTIVE
                   </span>
                 </div>
               </CardContent>
               <CardFooter>
-                {/* We will wire this button up to the Sheet in the next step! */}
                 <Button
-                  className="w-full bg-primary hover:bg-primary/90 group"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground group"
                   onClick={() => {
-                    setSelectedCourseId(enrollment.courseId); // Note: Ensure this matches your Prisma schema (it might be enrollment.course.id)
-                    setSelectedCourseTitle(enrollment.course.title);
+                    setSelectedCourseId(enrollment.courseId);
+                    setSelectedCourseTitle(enrollment.course?.title || "Course");
                     setIsSheetOpen(true);
                   }}
                 >
@@ -170,7 +167,51 @@ export default function MyCoursesPage() {
             </Card>
           </motion.div>
         ))}
+
+        {/* 👉 2. MAP THROUGH PENDING COURSES (Locked styling, lower opacity) */}
+        {pendingCourses.map((payment, index) => (
+          <motion.div
+            key={`pending-${payment.id}`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: (activeEnrollments.length + index) * 0.1 }}
+          >
+            <Card className="flex flex-col h-full border-t-4 border-t-amber-400 bg-slate-50/70 opacity-80">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <CardTitle className="line-clamp-2 text-xl text-slate-700">
+                    {payment.course?.title || "Course Request"}
+                  </CardTitle>
+                  <Lock className="h-5 w-5 text-amber-500 flex-shrink-0" />
+                </div>
+                <CardDescription className="line-clamp-2 mt-2 text-amber-700/80">
+                  Your payment is currently being verified by an administrator. Materials will unlock automatically upon approval.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <div className="flex items-center text-sm text-amber-700 bg-amber-100/50 p-2 rounded-md w-fit border border-amber-200">
+                  <Clock className="mr-2 h-4 w-4 text-amber-600" />
+                  Status:{" "}
+                  <span className="font-semibold ml-1">
+                    VERIFYING
+                  </span>
+                </div>
+              </CardContent>
+              <CardFooter>
+                {/* Disabled button for pending courses */}
+                <Button
+                  disabled
+                  className="w-full bg-slate-200 text-slate-500 border-none cursor-not-allowed"
+                >
+                  <Lock className="mr-2 h-4 w-4" /> Locked
+                </Button>
+              </CardFooter>
+            </Card>
+          </motion.div>
+        ))}
+
       </div>
+
       <CourseMaterialsSheet
         isOpen={isSheetOpen}
         onOpenChange={setIsSheetOpen}

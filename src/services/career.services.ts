@@ -35,4 +35,9 @@ export const careerService = {
     );
     return response;
   },
+
+  submitApplication: async (payload: any) => {
+    const response = await httpClient.post("/api/v1/careers/apply", payload);
+    return response;
+  },
 };

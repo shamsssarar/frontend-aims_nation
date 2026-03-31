@@ -5,7 +5,9 @@ import { TeacherCourse } from "@/types/teacher.types";
 export const teacherService = {
   // Fetches only the courses assigned to the logged-in teacher
   getMyClasses: async () => {
-    return httpClient.get<TeacherCourse[]>("/api/v1/teachers/my-classes");
+    const response = await httpClient.get("/api/v1/teachers/my-classes");
+    // 👉 THE FIX: We must unwrap the Axios response to get the actual array!
+    return response;
   },
   getAllTeachers: async () => {
     const response = await httpClient.get("/api/v1/teachers");

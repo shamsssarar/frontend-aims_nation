@@ -5,9 +5,23 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { teacherService } from "@/services/teacher.services";
 import { TeacherCourse } from "@/types/teacher.types";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Users, MapPin, Calendar, ArrowRight, ClipboardList } from "lucide-react";
+import {
+  Loader2,
+  Users,
+  MapPin,
+  Calendar,
+  ArrowRight,
+  ClipboardList,
+} from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function TeacherDashboardPage() {
@@ -16,8 +30,11 @@ export default function TeacherDashboardPage() {
 
   useEffect(() => {
     // Fire the fetch immediately using our cache-busting pattern
-    teacherService.getMyClasses()
-      .then((data) => setClasses(data))
+    teacherService
+      .getMyClasses()
+      .then((data) => {
+        if (data && Array.isArray(data)) setClasses(data);
+      })
       .catch((error) => {
         console.error("Failed to fetch teacher classes:", error);
         setClasses([]); // Fallback to empty state on error
@@ -40,9 +57,12 @@ export default function TeacherDashboardPage() {
         <div className="h-24 w-24 bg-primary/10 rounded-full flex items-center justify-center mb-2">
           <ClipboardList className="h-12 w-12 text-primary" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground">No Classes Assigned</h2>
+        <h2 className="text-2xl font-bold text-foreground">
+          No Classes Assigned
+        </h2>
         <p className="text-muted-foreground max-w-md">
-          You have not been assigned to teach any classes yet. Please contact the administrator if you believe this is a mistake.
+          You have not been assigned to teach any classes yet. Please contact
+          the administrator if you believe this is a mistake.
         </p>
       </div>
     );
@@ -52,7 +72,9 @@ export default function TeacherDashboardPage() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight text-foreground">My Classroom Hub</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-foreground">
+          My Classroom Hub
+        </h2>
         <p className="text-muted-foreground mt-2">
           Manage your schedule, students, and course materials.
         </p>
@@ -68,19 +90,23 @@ export default function TeacherDashboardPage() {
           >
             <Card className="flex flex-col h-full border-t-4 border-t-primary hover:shadow-md transition-all duration-200">
               <CardHeader>
-                <CardTitle className="line-clamp-1 text-xl">{course.title}</CardTitle>
+                <CardTitle className="line-clamp-1 text-xl">
+                  {course.title}
+                </CardTitle>
                 <CardDescription className="line-clamp-2 mt-2">
                   {course.description || "No description provided."}
                 </CardDescription>
               </CardHeader>
-              
+
               <CardContent className="flex-1 space-y-3">
                 {/* Logistics Info */}
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Calendar className="mr-2 h-4 w-4 text-primary" />
-                  <span className="font-medium">{course.schedule || "TBD"}</span>
+                  <span className="font-medium">
+                    {course.schedule || "TBD"}
+                  </span>
                 </div>
-                
+
                 <div className="flex items-center text-sm text-muted-foreground">
                   <MapPin className="mr-2 h-4 w-4 text-secondary" />
                   <span>{course.roomNumber || "Unassigned Room"}</span>
@@ -94,14 +120,19 @@ export default function TeacherDashboardPage() {
                   </div>
                   {/* Visual warning if class is full */}
                   {course._count.enrollments >= course.maxCapacity && (
-                    <span className="text-xs font-bold text-red-500 bg-red-50 px-2 py-1 rounded">FULL</span>
+                    <span className="text-xs font-bold text-red-500 bg-red-50 px-2 py-1 rounded">
+                      FULL
+                    </span>
                   )}
                 </div>
               </CardContent>
 
               <CardFooter>
                 {/* This button will route to the specific class dashboard (The Spoke) */}
-                <Button className="w-full bg-primary hover:bg-primary/90 group" asChild>
+                <Button
+                  className="w-full bg-primary hover:bg-primary/90 group"
+                  asChild
+                >
                   <Link href={`/teacher/dashboard/classes/${course.id}`}>
                     Manage Class
                     <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />

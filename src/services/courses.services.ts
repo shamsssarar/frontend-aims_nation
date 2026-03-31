@@ -10,6 +10,10 @@ export const courseService = {
     const response = await httpClient.get(`/api/v1/courses/${courseId}/roster`);
     return response;
   },
+  getCourseById: async (courseId: string) => {
+    const response = await httpClient.get(`/api/v1/courses/${courseId}`);
+    return response;
+  },
   createCourse: async (payload: any) => {
     const response = await httpClient.post("/api/v1/courses", payload);
     return response;

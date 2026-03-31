@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { adminService } from "@/services/admin.services";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,38 +32,37 @@ import {
 } from "@/components/ui/select";
 import { Plus, Loader2, BookOpen } from "lucide-react";
 import { courseService } from "@/services/courses.services";
-import { teacherService } from "@/services/teacher.services";
-import { careerService } from "@/services/career.services";
-import { id } from "zod/locales";
+import { careerService } from "@/services/career.services"; // 👉 We are back to the Career Service!
 
 export default function CoursesManagementPage() {
   const [courses, setCourses] = useState<any[]>([]);
-  const [teachers, setTeachers] = useState<any[]>([]);
+  const [applicants, setApplicants] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  // Modal & Form States
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // NOTE: Adjust these field names if your Prisma Course model uses different names (e.g., 'price' instead of 'fee')
   const [courseForm, setCourseForm] = useState({
     title: "",
     courseFee: "",
-    maxCapacity: "20", // Default to 20 if not provided
-    teacherApplicantId: "",
+    maxCapacity: "20",
+    teacherApplicantId: "", 
   });
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // Fetch both courses and teachers at the same time
-      const [coursesRes, teachersRes] = await Promise.all([
+      const [coursesRes, applicantsRes] = await Promise.all([
         courseService.getAllCourses(),
-        careerService.getEligibleApplicants(),
+        careerService.getEligibleApplicants(), // 👉 Fetching from ATS
       ]);
-      console.log("TEACHERS API RESPONSE:", teachersRes);
-      setCourses(coursesRes || []);
-      setTeachers((teachersRes as any[]) || []);
+      
+      const fetchedCourses = (coursesRes as any)?.data?.data || (coursesRes as any)?.data || coursesRes || [];
+      const fetchedApplicants = (applicantsRes as any)?.data?.data || (applicantsRes as any)?.data || applicantsRes || [];
+      
+      setCourses(fetchedCourses);
+      setApplicants(fetchedApplicants);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     } finally {
@@ -77,7 +75,6 @@ export default function CoursesManagementPage() {
   }, []);
 
   const handleCreateCourse = async () => {
-    // Basic validation
     if (
       !courseForm.title ||
       !courseForm.teacherApplicantId ||
@@ -89,18 +86,16 @@ export default function CoursesManagementPage() {
 
     setIsSubmitting(true);
     try {
-      // Format the payload to ensure numbers are actually numbers
       const payload = {
         title: courseForm.title,
         courseFee: Number(courseForm.courseFee),
         maxCapacity: Number(courseForm.maxCapacity),
-        teacherApplicantId: courseForm.teacherApplicantId,
+        teacherApplicantId: courseForm.teacherApplicantId, 
       };
 
       await courseService.createCourse(payload);
       alert("Course created successfully!");
 
-      // Refresh the table, close modal, and reset form
       fetchData();
       setIsModalOpen(false);
       setCourseForm({
@@ -126,18 +121,18 @@ export default function CoursesManagementPage() {
             Course Management
           </h1>
           <p className="text-muted-foreground mt-2">
-            Create and manage curriculum and assign teachers.
+            Create curriculum and assign officially hired teachers.
           </p>
         </div>
 
         {/* CREATE COURSE MODAL */}
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-indigo-600 hover:bg-indigo-700">
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
               <Plus className="mr-2 h-4 w-4" /> Create Course
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-106.25">
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Create New Course</DialogTitle>
               <DialogDescription>
@@ -166,19 +161,19 @@ export default function CoursesManagementPage() {
                 <Select
                   value={courseForm.teacherApplicantId}
                   onValueChange={(val) => {
-                    const selectedPerson = teachers.find((t) => t.id === val);
+                    const selectedPerson = applicants.find((a) => a.id === val);
 
+                    // 👉 THE INTERCEPTOR: Stop them if they aren't HIRED!
                     if (selectedPerson?.status === "REVIEWED") {
-                      // 1. Close the modal
                       setIsModalOpen(false);
-                      // 2. Alert the admin
                       alert(
-                        "This applicant needs to be officially hired before they can be assigned to a course. Redirecting to setup...",
+                        "This applicant needs to be officially hired before they can be assigned to a course. Redirecting to setup..."
                       );
-                      // 3. Redirect to your hire route (UPDATE THIS URL TO MATCH YOUR ACTUAL HIRE ROUTE!)
                       router.push(`/admin/dashboard/hire-teacher`);
                       return;
                     }
+                    
+                    // If they are HIRED, allow the selection!
                     setCourseForm({ ...courseForm, teacherApplicantId: val });
                   }}
                 >
@@ -186,25 +181,25 @@ export default function CoursesManagementPage() {
                     <SelectValue placeholder="Select a teacher..." />
                   </SelectTrigger>
 
-                  {/* 👉 THE FIX: z-[9999] forces it to the absolute front layer! */}
-                  <SelectContent className="z-9999">
-                    {teachers && teachers.length > 0 ? (
-                      teachers.map((teacher) => (
-                        <SelectItem key={teacher.id} value={teacher.id}>
-                          {/* If your API returns nested data like teacher.user.name, adjust this! */}
-                          {teacher.name ||
-                            teacher.user?.name ||
-                            "Unnamed Teacher"}
+                  <SelectContent className="z-[9999]">
+                    {applicants && applicants.length > 0 ? (
+                      applicants.map((applicant) => (
+                        <SelectItem key={applicant.id} value={applicant.id}>
+                          {applicant.name} 
                           <span
-                            className={`ml-2 text-[10px] uppercase font-bold ${teacher.status === "HIRED" ? "text-green-600" : "text-amber-500"}`}
+                            className={`ml-2 text-[10px] uppercase font-bold ${
+                              applicant.status === "HIRED"
+                                ? "text-green-600"
+                                : "text-amber-500"
+                            }`}
                           >
-                            ({teacher.status})
+                            ({applicant.status})
                           </span>
                         </SelectItem>
                       ))
                     ) : (
                       <SelectItem value="no-data" disabled>
-                        No eligible teachers found
+                        No applicants available
                       </SelectItem>
                     )}
                   </SelectContent>
@@ -249,7 +244,7 @@ export default function CoursesManagementPage() {
               <Button
                 onClick={handleCreateCourse}
                 disabled={isSubmitting}
-                className="w-full bg-indigo-600 hover:bg-indigo-700"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 {isSubmitting ? (
                   <>
@@ -293,25 +288,27 @@ export default function CoursesManagementPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              courses.map((course) => (
-                <TableRow key={course.id}>
-                  <TableCell className="font-medium flex items-center">
-                    <BookOpen className="h-4 w-4 mr-2 text-indigo-500" />
-                    {course.title}
-                  </TableCell>
-                  <TableCell>
-                    {/* Assuming your backend includes the teacher data. If it's just an ID, we can cross-reference the teachers array! */}
-                    {course.teacher?.user?.name ||
-                      teachers.find((t) => t.id === course.teacherApplicantId)
-                        ?.name ||
-                      "Unassigned"}
-                  </TableCell>
-                  <TableCell>{course.maxCapacity}</TableCell>
-                  <TableCell className="text-right font-semibold">
-                    ৳ {course.courseFee?.toLocaleString() || "0"}
-                  </TableCell>
-                </TableRow>
-              ))
+              courses.map((course) => {
+                // Find the applicant name to display in the table
+                const assignedApplicant = applicants.find(a => a.id === course.teacherApplicantId);
+                
+                return (
+                  <TableRow key={course.id}>
+                    <TableCell className="font-medium flex items-center">
+                      <BookOpen className="h-4 w-4 mr-2 text-primary" />
+                      {course.title}
+                    </TableCell>
+                    <TableCell>
+                      {/* Show the applicant's name, or fallback to the teacher relation if the backend resolved it */}
+                      {course.teacher?.user?.name || assignedApplicant?.name || "Unassigned"}
+                    </TableCell>
+                    <TableCell>{course.maxCapacity}</TableCell>
+                    <TableCell className="text-right font-semibold text-primary">
+                      ৳ {course.courseFee?.toLocaleString() || "0"}
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>

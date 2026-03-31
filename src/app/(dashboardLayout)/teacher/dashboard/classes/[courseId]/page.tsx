@@ -109,6 +109,8 @@ export default function ClassControlCenter() {
     teacherComments: "",
   });
 
+  const [courseData, setCourseData] = useState<any>(null);
+
   const fetchMaterials = async () => {
     setIsLoadingMaterials(true);
     try {
@@ -120,10 +122,6 @@ export default function ClassControlCenter() {
       setIsLoadingMaterials(false);
     }
   };
-
-  useEffect(() => {
-    fetchMaterials();
-  }, [courseId]);
 
   const fetchRoster = async () => {
     setIsLoadingRoster(true);
@@ -138,9 +136,20 @@ export default function ClassControlCenter() {
     }
   };
 
+  const fetchCourseDetails = async () => {
+    try {
+      const res = await courseService.getCourseById(courseId as string);
+      const data = (res as any)?.data?.data || (res as any)?.data || res;
+      setCourseData(data);
+    } catch (error) {
+      console.error("Failed to fetch course:", error);
+    }
+  };
+
   useEffect(() => {
     fetchMaterials();
     fetchRoster();
+    fetchCourseDetails();
   }, [courseId]);
 
   const handleUpload = async () => {
@@ -240,12 +249,15 @@ export default function ClassControlCenter() {
               Back to Classes
             </Link>
           </Button>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">
-            {DUMMY_COURSE.title}
-          </h2>
-          <p className="text-muted-foreground mt-1">
-            {DUMMY_COURSE.schedule} • {DUMMY_COURSE.roomNumber}
-          </p>
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground">
+              {courseData?.title || "Loading Course..."}
+            </h2>
+            <p className="text-muted-foreground mt-1">
+              {/* If you have room/schedule in your schema, add them here. Otherwise just show the fee/category! */}
+              Category: {courseData?.category || "General"}
+            </p>
+          </div>
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import { httpClient } from "@/lib/axios/httpClient";
+import { create } from "domain";
 
 export const studentServices = {
   // Example: Fetch all students
@@ -14,4 +15,8 @@ export const studentServices = {
     );
     return response;
   },
+  createStudentProfile: async (payload: any) => {
+    const response = await httpClient.post("/api/v1/profiles/setup-student", payload);
+    return response;
+  }
 };

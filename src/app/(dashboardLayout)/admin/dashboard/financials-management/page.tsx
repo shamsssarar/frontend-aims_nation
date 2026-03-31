@@ -182,7 +182,9 @@ export default function FinancialsManagementPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Invoice ID</TableHead>
-                <TableHead>Date Created</TableHead>
+                <TableHead>Student Name</TableHead>
+                <TableHead>Payment Date</TableHead>
+                <TableHead>Payment Details</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Action</TableHead>
@@ -211,8 +213,27 @@ export default function FinancialsManagementPage() {
                     <TableCell className="font-medium text-xs font-mono text-slate-500">
                       {payment.id.split("-")[0].toUpperCase()}
                     </TableCell>
+                    <TableCell className="text-sm font-medium">
+                      {payment.student?.user?.name || "Unknown Student"}
+                    </TableCell>
                     <TableCell className="text-sm">
                       {new Date(payment.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      {payment.transactionId ? (
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold text-slate-700 uppercase">
+                            {payment.paymentMethod}
+                          </span>
+                          <span className="text-xs font-mono text-slate-500">
+                            {payment.transactionId}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-400 italic">
+                          Manual / Cash
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell className="font-semibold">
                       ৳ {payment.amount?.toLocaleString()}

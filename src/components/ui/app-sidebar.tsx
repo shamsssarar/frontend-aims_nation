@@ -10,7 +10,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import Link from "next/link";
-import { useSession, signOut } from "@/lib/authClient";
+import { useSession, signOut, authClient } from "@/lib/authClient";
 import { useRouter } from "next/navigation";
 import {
   Sidebar,
@@ -110,13 +110,14 @@ const navItems = [
   },
 ];
 
+
 export function AppSidebar() {
   const router = useRouter();
   const { data: session } = useSession();
   const { setOpenMobile } = useSidebar();
 
   const handleLogout = async () => {
-    await signOut();
+    await authClient.signOut();
     router.push("/login");
   };
 
@@ -127,21 +128,18 @@ export function AppSidebar() {
     item.allowedRoles.includes(userRole),
   );
 
-  const getHomeUrl = () => {
-    if (userRole === "TEACHER") return "/teacher/dashboard";
-    if (userRole === "ADMIN") return "/admin/dashboard";
-    return "/dashboard"; // Default for students
-  };
-
   return (
     <Sidebar variant="inset">
       <SidebarHeader className="p-4">
-        <div className="flex items-center gap-2 font-bold text-xl text-primary">
+        <Link
+          href="/"
+          className="flex items-center gap-2 font-bold text-xl text-primary hover:opacity-80 transition-opacity cursor-pointer"
+        >
           <div className="h-8 w-8 rounded bg-primary flex items-center justify-center text-primary-foreground">
             A
           </div>
           AiMS Nation
-        </div>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -179,8 +177,7 @@ export function AppSidebar() {
             onClick={handleLogout}
             className="text-red-500 hover:text-red-600 hover:bg-red-50"
           >
-            <LogOut />
-            <span>Sign Out</span>
+            <LogOut className="h-4 w-4" /> Sign Out
           </SidebarMenuButton>
         </div>
       </SidebarFooter>

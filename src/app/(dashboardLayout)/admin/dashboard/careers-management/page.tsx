@@ -1,5 +1,5 @@
 "use client";
-
+import { AiMSNationInlineLoader } from "@/components/shared/AimsNationLoading";
 import { useEffect, useState } from "react";
 import { Loader2, Check, X } from "lucide-react";
 import { careerService } from "@/services/career.services";
@@ -63,7 +63,7 @@ export default function CareerManagementPage() {
   if (isLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <AiMSNationInlineLoader />
       </div>
     );
   }

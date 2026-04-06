@@ -33,8 +33,9 @@ export async function proxy(request: NextRequest) {
     // 👉 1. Fetch the role FIRST if they are on an auth route OR a protected route
     if (isAuthRoute || (routeOwner !== null && routeOwner !== "COMMON")) {
       try {
-
-        const authUrl = "http://localhost:5000/api/auth/get-session";
+        const baseUrl =
+          process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+        const authUrl = `${baseUrl}/api/auth/get-session`;
 
         const sessionResponse = await fetch(authUrl, {
           headers: { cookie: request.headers.get("cookie") || "" },

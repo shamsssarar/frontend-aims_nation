@@ -139,7 +139,7 @@ export default function PublicCoursesPage() {
                       <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">
                         Course Fee
                       </p>
-                      <p className="text-2xl font-bold text-slate-900">
+                      <p className="text-2xl font-bold text-slate-900 dark:text-white">
                         ৳ {course.courseFee?.toLocaleString()}
                       </p>
                     </div>

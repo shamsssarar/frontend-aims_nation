@@ -33,6 +33,7 @@ import {
 import { Plus, Loader2, BookOpen } from "lucide-react";
 import { courseService } from "@/services/courses.services";
 import { careerService } from "@/services/career.services"; // 👉 We are back to the Career Service!
+import { AiMSNationInlineLoader } from "@/components/shared/AimsNationLoading";
 
 export default function CoursesManagementPage() {
   const [courses, setCourses] = useState<any[]>([]);
@@ -248,7 +249,7 @@ export default function CoursesManagementPage() {
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                    <AiMSNationInlineLoader />
                     Creating...
                   </>
                 ) : (
@@ -275,7 +276,7 @@ export default function CoursesManagementPage() {
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={4} className="h-24 text-center">
-                  <Loader2 className="animate-spin h-6 w-6 text-primary mx-auto" />
+                  <AiMSNationInlineLoader />
                 </TableCell>
               </TableRow>
             ) : courses.length === 0 ? (

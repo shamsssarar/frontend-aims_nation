@@ -1,6 +1,6 @@
 // src/services/enrollment.services.ts
 import { httpClient } from "@/lib/axios/httpClient";
-import { Enrollment } from "@/types/Enrollment.types";
+import { Enrollment } from "@/types/enrollment.types";
 
 export const enrollmentService = {
   getMyEnrollments: async () => {

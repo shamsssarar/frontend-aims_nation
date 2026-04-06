@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, CheckCircle, Copy, UserPlus } from "lucide-react";
+import { AiMSNationInlineLoader } from "@/components/shared/AimsNationLoading";
 
 export default function HireTeacherPage() {
   const router = useRouter();
@@ -271,7 +272,7 @@ export default function HireTeacherPage() {
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing
+                <AiMSNationInlineLoader /> Processing
                 Hiring Transaction...
               </>
             ) : (

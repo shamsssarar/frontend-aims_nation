@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { paymentService } from "@/services/payment.services";
 import {
   Card,
   CardContent,
@@ -12,23 +11,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Loader2,
-  CheckCircle,
-  ShieldCheck,
-  CreditCard,
-  Receipt,
-} from "lucide-react";
+import { Loader2, ShieldCheck, CreditCard, Receipt, Lock } from "lucide-react";
 import { courseService } from "@/services/courses.services";
+import { paymentService } from "@/services/payment.services";
+// Note: Make sure you have a way to get the user's auth token for the fetch call below!
 
 export default function CheckoutPage() {
   const params = useParams();
@@ -38,10 +24,6 @@ export default function CheckoutPage() {
   const [course, setCourse] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Form State
-  const [paymentMethod, setPaymentMethod] = useState("BKASH");
-  const [transactionId, setTransactionId] = useState("");
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -61,25 +43,27 @@ export default function CheckoutPage() {
     if (courseId) fetchCourseDetails();
   }, [courseId, router]);
 
-  const handlePaymentSubmit = async () => {
-    if (!transactionId || transactionId.length < 5) {
-      alert("Please enter a valid Transaction ID");
-      return;
-    }
-
+  const handleSSLCommerzPayment = async () => {
     setIsSubmitting(true);
     try {
-      await paymentService.submitPayment({
-        courseId,
-        paymentMethod,
-        transactionId,
-      });
+      // 1. Call your beautifully abstracted service layer
+      const result = await paymentService.initSSLCommerzPayment(courseId);
 
-      // Success! Send them to their dashboard to see the "Pending" status
-      router.push("/student/dashboard");
+      // Depending on your httpClient setup, the payload might be deeply nested.
+      // We defensively check for result.data.url or result.url
+      const targetUrl = (result as any)?.data?.url || (result as any)?.url;
+
+      // 2. Redirect to SSLCommerz if successful
+      if (targetUrl && (result as any)?.success !== false) {
+        window.location.href = targetUrl;
+      } else {
+        console.error("Failed to generate payment link:", result);
+        alert("Could not initiate payment. Please try again.");
+        setIsSubmitting(false);
+      }
     } catch (error) {
-      console.error("Payment failed:", error);
-      alert("Failed to submit payment. Please try again or contact support.");
+      console.error("Payment error:", error);
+      alert("Something went wrong with the payment gateway!");
       setIsSubmitting(false);
     }
   };
@@ -138,99 +122,52 @@ export default function CheckoutPage() {
             <Card className="bg-slate-100 border-none shadow-inner">
               <CardContent className="p-6">
                 <h3 className="font-semibold text-slate-800 flex items-center mb-3">
-                  <ShieldCheck className="mr-2 h-5 w-5 text-green-600" />{" "}
-                  Payment Instructions
+                  <ShieldCheck className="mr-2 h-5 w-5 text-green-600" /> Secure
+                  Payment Gateway
                 </h3>
-                <ol className="list-decimal list-inside space-y-2 text-sm text-slate-600">
-                  <li>Open your selected Mobile Banking App (bKash/Nagad).</li>
-                  <li>
-                    Select <strong>Send Money</strong> or{" "}
-                    <strong>Payment</strong>.
-                  </li>
-                  <li>
-                    Enter our official number:{" "}
-                    <span className="font-bold text-slate-900">
-                      017XX-XXXXXX
-                    </span>
-                  </li>
-                  <li>
-                    Enter the exact amount:{" "}
-                    <span className="font-bold text-slate-900">
-                      ৳ {course?.courseFee}
-                    </span>
-                  </li>
-                  <li>
-                    Copy the Transaction ID (TxID) and paste it in the form
-                    below.
-                  </li>
-                </ol>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  You will be redirected to the secure SSLCommerz gateway to
+                  complete your purchase. We support all major credit cards,
+                  debit cards, and mobile banking platforms (bKash, Nagad,
+                  Rocket).
+                </p>
               </CardContent>
             </Card>
           </div>
 
-          {/* RIGHT COLUMN: PAYMENT FORM */}
+          {/* RIGHT COLUMN: ACTION */}
           <div>
             <Card className="border-slate-200 shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <CreditCard className="mr-2 h-5 w-5 text-slate-600" /> Payment
-                  Details
+                  <CreditCard className="mr-2 h-5 w-5 text-slate-600" />{" "}
+                  Complete Purchase
                 </CardTitle>
                 <CardDescription>
-                  Verify your payment to unlock course materials instantly upon
-                  approval.
+                  Your payment is encrypted and 100% secure.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label>Payment Method</Label>
-                  <Select
-                    value={paymentMethod}
-                    onValueChange={setPaymentMethod}
-                  >
-                    <SelectTrigger className="focus:ring-primary">
-                      <SelectValue placeholder="Select method" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="BKASH">bKash</SelectItem>
-                      <SelectItem value="NAGAD">Nagad</SelectItem>
-                      <SelectItem value="ROCKET">Rocket</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
 
-                <div className="space-y-2">
-                  <Label>
-                    Transaction ID (TxID){" "}
-                    <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    placeholder="e.g. 9XZ8B7C6D5"
-                    value={transactionId}
-                    onChange={(e) => setTransactionId(e.target.value)}
-                    className="uppercase focus-visible:ring-primary font-mono text-lg"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    This is the unique 10-digit code received via SMS after
-                    payment.
-                  </p>
-                </div>
+              <CardContent className="space-y-6 flex flex-col items-center justify-center py-8">
+                <Lock className="h-16 w-16 text-slate-300 mb-4" />
+                <p className="text-center text-slate-500 font-medium">
+                  Click below to open the payment portal.
+                </p>
               </CardContent>
+
               <CardFooter className="bg-slate-50 border-t p-6">
                 <Button
-                  className="w-full bg-primary hover:bg-primary/90 text-lg py-6"
-                  onClick={handlePaymentSubmit}
-                  disabled={isSubmitting || !transactionId}
+                  className="w-full bg-primary hover:bg-primary/90 text-lg py-6 transition-all"
+                  onClick={handleSSLCommerzPayment}
+                  disabled={isSubmitting}
                 >
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />{" "}
-                      Verifying...
+                      Redirecting to Gateway...
                     </>
                   ) : (
-                    <>
-                      <CheckCircle className="mr-2 h-5 w-5" /> Confirm Payment
-                    </>
+                    <>Pay ৳ {course?.courseFee?.toLocaleString()} Now</>
                   )}
                 </Button>
               </CardFooter>

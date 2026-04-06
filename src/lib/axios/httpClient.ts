@@ -1,5 +1,4 @@
 // src/lib/httpClient.ts
-// import { cookies } from 'next/headers';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -66,6 +65,7 @@ async function fetchApi<TData>(
     // If the backend throws an AppError, we catch it here.
     console.error(
       `API Error [${response.status}] on ${endpoint}:`,
+
       jsonResponse.message,
     );
 

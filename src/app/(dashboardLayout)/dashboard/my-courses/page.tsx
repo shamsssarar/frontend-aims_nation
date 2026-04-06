@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "@/lib/authClient";
 import { enrollmentService } from "@/services/enrollment.services";
 import { paymentService } from "@/services/payment.services"; // 👉 Imported the payment service!
-import { Enrollment } from "@/types/Enrollment.types";
+import { Enrollment } from "@/types/enrollment.types";
 import {
   Card,
   CardContent,
@@ -18,14 +18,15 @@ import { Loader2, BookOpen, Clock, ArrowRight, Lock } from "lucide-react"; // �
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { CourseMaterialsSheet } from "@/components/ui/courseMaterialsSheet";
+import { AiMSNationInlineLoader } from "@/components/shared/AimsNationLoading";
 
 export default function MyCoursesPage() {
   const { data: session, isPending: isAuthPending } = useSession();
-  
+
   // 👉 Split state into Active and Pending
   const [activeEnrollments, setActiveEnrollments] = useState<Enrollment[]>([]);
   const [pendingCourses, setPendingCourses] = useState<any[]>([]);
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -45,7 +46,7 @@ export default function MyCoursesPage() {
     const fetchMyCoursesData = async () => {
       try {
         setIsLoading(true);
-        
+
         // 👉 Fetch BOTH enrollments and payments, just like the dashboard!
         const [enrollmentsRes, paymentsRes] = await Promise.all([
           enrollmentService.getMyEnrollments(),
@@ -53,8 +54,16 @@ export default function MyCoursesPage() {
         ]);
 
         if (isMounted) {
-          const enrollments = (enrollmentsRes as any)?.data?.data || (enrollmentsRes as any)?.data || enrollmentsRes || [];
-          const payments = (paymentsRes as any)?.data?.data || (paymentsRes as any)?.data || paymentsRes || [];
+          const enrollments =
+            (enrollmentsRes as any)?.data?.data ||
+            (enrollmentsRes as any)?.data ||
+            enrollmentsRes ||
+            [];
+          const payments =
+            (paymentsRes as any)?.data?.data ||
+            (paymentsRes as any)?.data ||
+            paymentsRes ||
+            [];
 
           // Filter out exactly what we need
           const active = enrollments.filter((e: any) => e.status === "ACTIVE");
@@ -81,8 +90,8 @@ export default function MyCoursesPage() {
 
   if (isAuthPending || isLoading) {
     return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex items-center justify-center">
+        <AiMSNationInlineLoader  />
       </div>
     );
   }
@@ -123,7 +132,6 @@ export default function MyCoursesPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        
         {/* 👉 1. MAP THROUGH ACTIVE COURSES (Normal styling) */}
         {activeEnrollments.map((enrollment, index) => (
           <motion.div
@@ -156,7 +164,9 @@ export default function MyCoursesPage() {
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground group"
                   onClick={() => {
                     setSelectedCourseId(enrollment.courseId);
-                    setSelectedCourseTitle(enrollment.course?.title || "Course");
+                    setSelectedCourseTitle(
+                      enrollment.course?.title || "Course",
+                    );
                     setIsSheetOpen(true);
                   }}
                 >
@@ -174,7 +184,10 @@ export default function MyCoursesPage() {
             key={`pending-${payment.id}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: (activeEnrollments.length + index) * 0.1 }}
+            transition={{
+              duration: 0.3,
+              delay: (activeEnrollments.length + index) * 0.1,
+            }}
           >
             <Card className="flex flex-col h-full border-t-4 border-t-amber-400 bg-slate-50/70 opacity-80">
               <CardHeader>
@@ -185,16 +198,14 @@ export default function MyCoursesPage() {
                   <Lock className="h-5 w-5 text-amber-500 flex-shrink-0" />
                 </div>
                 <CardDescription className="line-clamp-2 mt-2 text-amber-700/80">
-                  Your payment is currently being verified by an administrator. Materials will unlock automatically upon approval.
+                  Your payment is currently being verified by an administrator.
+                  Materials will unlock automatically upon approval.
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-1">
                 <div className="flex items-center text-sm text-amber-700 bg-amber-100/50 p-2 rounded-md w-fit border border-amber-200">
                   <Clock className="mr-2 h-4 w-4 text-amber-600" />
-                  Status:{" "}
-                  <span className="font-semibold ml-1">
-                    VERIFYING
-                  </span>
+                  Status: <span className="font-semibold ml-1">VERIFYING</span>
                 </div>
               </CardContent>
               <CardFooter>
@@ -209,7 +220,6 @@ export default function MyCoursesPage() {
             </Card>
           </motion.div>
         ))}
-
       </div>
 
       <CourseMaterialsSheet

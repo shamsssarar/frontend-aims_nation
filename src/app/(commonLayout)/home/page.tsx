@@ -9,7 +9,7 @@ import { Footer } from "@/components/layout/Footer";
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-[#FDFDF9] selection:bg-[#E8AD31] selection:text-white overflow-hidden">
-      <Navbar />
+      
       <Hero />
       <UniverseOfLearning />
       <WhyChooseUs />

@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Loader2 } from "lucide-react"; // Make sure Loader2 and CheckCircle are imported!
 import { paymentService } from "@/services/payment.services";
+import { AiMSNationInlineLoader } from "@/components/shared/AimsNationLoading";
 export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState({
     totalStudents: 0,
@@ -220,7 +221,7 @@ export default function AdminDashboard() {
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={4} className="h-24 text-center">
-                    <Loader2 className="animate-spin h-6 w-6 text-primary mx-auto" />
+                    <AiMSNationInlineLoader />
                   </TableCell>
                 </TableRow>
               ) : pendingInvoices.length === 0 ? (

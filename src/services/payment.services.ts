@@ -28,5 +28,14 @@ export const paymentService = {
     const response = await httpClient.post("/api/v1/payments/buy", payload);
     return response;
   },
+
+  initSSLCommerzPayment: async (courseId: string) => {
+    // Your httpClient will automatically attach the base URL and the Bearer token
+    const response = await httpClient.post("/api/v1/payments/init", { courseId });
+    
+    // If you are using Axios, the data is usually inside response.data
+    // If your httpClient is a custom fetch wrapper, you might just return response
+    return response 
+  },
   // Later you can add: initiatePayment: async (id) => {...}
 };

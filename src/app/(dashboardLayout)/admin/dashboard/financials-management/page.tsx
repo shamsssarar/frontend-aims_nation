@@ -28,6 +28,7 @@ import {
   Receipt,
 } from "lucide-react";
 import { paymentService } from "@/services/payment.services";
+import { AiMSNationInlineLoader } from "@/components/shared/AimsNationLoading";
 
 export default function FinancialsManagementPage() {
   const [payments, setPayments] = useState<any[]>([]);
@@ -194,7 +195,7 @@ export default function FinancialsManagementPage() {
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-32 text-center">
-                    <Loader2 className="animate-spin h-8 w-8 text-primary mx-auto" />
+                    <AiMSNationInlineLoader />
                   </TableCell>
                 </TableRow>
               ) : filteredPayments.length === 0 ? (
@@ -258,7 +259,7 @@ export default function FinancialsManagementPage() {
                           onClick={() => handleApprovePayment(payment.id)}
                         >
                           {isApprovingId === payment.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <AiMSNationInlineLoader />
                           ) : (
                             <>
                               <CheckCircle className="mr-2 h-4 w-4" /> Approve

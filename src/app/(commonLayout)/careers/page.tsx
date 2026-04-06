@@ -48,7 +48,7 @@ export default function CareersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
+    
     try {
       await careerService.submitApplication(formData);
       setIsSuccess(true);

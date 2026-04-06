@@ -6,11 +6,13 @@ import { FinalCTA } from "@/components/home/FinalCTA";
 
 export default function LandingPage() {
   return (
-    <>
+    <main className="min-h-screen dark:bg-slate-950 transition-colors bg-[#FDFDF9] selection:bg-[#E8AD31] selection:text-white overflow-hidden">
+      {/* Default behavior (frosted glass) */}
+
       <Hero />
       <UniverseOfLearning />
       <WhyChooseUs />
       <FinalCTA />
-    </>
+    </main>
   );
 }

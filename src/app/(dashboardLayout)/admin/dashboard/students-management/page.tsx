@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import {
-  Loader2,
   Search,
   GraduationCap,
   Mail,
@@ -32,6 +31,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { AiMSNationInlineLoader } from "@/components/shared/AimsNationLoading";
 
 export default function StudentsManagementPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -152,7 +152,7 @@ export default function StudentsManagementPage() {
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={4} className="h-32 text-center">
-                    <Loader2 className="animate-spin h-8 w-8 text-primary mx-auto" />
+                    <AiMSNationInlineLoader />
                   </TableCell>
                 </TableRow>
               ) : filteredStudents.length === 0 ? (
@@ -264,11 +264,7 @@ export default function StudentsManagementPage() {
               onClick={handleSaveUpdate}
               disabled={isUpdating}
             >
-              {isUpdating ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                "Save Changes"
-              )}
+              {isUpdating ? <AiMSNationInlineLoader /> : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>

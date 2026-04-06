@@ -23,7 +23,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Loader2,
   Search,
   Briefcase,
   Mail,
@@ -32,6 +31,7 @@ import {
   Banknote,
   BookOpen,
 } from "lucide-react";
+import { AiMSNationInlineLoader } from "@/components/shared/AimsNationLoading";
 
 export default function TeachersManagementPage() {
   const [teachers, setTeachers] = useState<any[]>([]);
@@ -151,8 +151,8 @@ export default function TeachersManagementPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="h-32 text-center">
-                    <Loader2 className="animate-spin h-8 w-8 text-primary mx-auto" />
+                  <TableCell colSpan={5} className="h-32 text-center">
+                    <AiMSNationInlineLoader />
                   </TableCell>
                 </TableRow>
               ) : filteredTeachers.length === 0 ? (
@@ -262,11 +262,7 @@ export default function TeachersManagementPage() {
               onClick={handleSaveUpdate}
               disabled={isUpdating}
             >
-              {isUpdating ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                "Save Changes"
-              )}
+              {isUpdating ? <AiMSNationInlineLoader /> : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>

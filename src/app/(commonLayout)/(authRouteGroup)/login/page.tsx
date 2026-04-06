@@ -43,7 +43,7 @@ export default function LoginPage() {
     }
 
     // Success! The middleware will catch them and route them appropriately
-    router.push("/dashboard");
+    window.location.href = "/dashboard";
   };
 
   return (

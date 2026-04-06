@@ -8,13 +8,15 @@ import {
   LayoutDashboard,
   User,
   Sun, // 👉 Imported Sun
-  Moon, // 👉 Imported Moon
+  Moon,
+  LogOut, // 👉 Imported Moon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/lib/authClient";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes"; // 👉 Re-enabled useTheme
-
+import { signOut } from "@/lib/authClient";
+import { useRouter } from "next/navigation";
 const theme = {
   green: "bg-[#6A8D52]",
   greenText: "text-[#6A8D52]",
@@ -24,7 +26,7 @@ const theme = {
 export function Navbar({ transparent = true }: { transparent?: boolean }) {
   const { data: session, isPending } = useSession();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-
+  const router = useRouter();
   // 👉 Theme & Hydration State
   const { theme: currentTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -134,11 +136,14 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
               {/* Dropdown Menu - Added dark mode styles */}
               {isUserMenuOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl shadow-xl py-2 flex flex-col z-50 animate-in fade-in slide-in-from-top-2">
+                  {/* Email Header */}
                   <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 mb-1">
                     <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
                       {session.user.email}
                     </p>
                   </div>
+
+                  {/* Profile Link */}
                   <Link
                     href="/my-profile"
                     onClick={() => setIsUserMenuOpen(false)}
@@ -147,6 +152,8 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
                     <User className="h-4 w-4 mr-3 text-slate-400 dark:text-slate-500" />
                     My Profile
                   </Link>
+
+                  {/* Dashboard Link */}
                   <Link
                     href={getDashboardRoute()}
                     onClick={() => setIsUserMenuOpen(false)}
@@ -155,6 +162,22 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
                     <LayoutDashboard className="h-4 w-4 mr-3 text-slate-400 dark:text-slate-500" />
                     Dashboard
                   </Link>
+
+                  {/* 👉 NEW: Sign Out Button */}
+                  <div className="border-t border-slate-100 dark:border-slate-800 mt-1 pt-1">
+                    <button
+                      onClick={async () => {
+                        setIsUserMenuOpen(false); // Close the menu instantly
+                        await signOut(); // Clear the better-auth session
+                        router.push("/login"); // Redirect to login page
+                        router.refresh(); // Force Next.js to update the UI
+                      }}
+                      className="w-full text-left px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center transition-colors"
+                    >
+                      <LogOut className="h-4 w-4 mr-3 text-red-500 dark:text-red-400" />
+                      Sign Out
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

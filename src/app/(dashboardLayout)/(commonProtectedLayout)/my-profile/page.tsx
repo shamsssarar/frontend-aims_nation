@@ -73,7 +73,6 @@ export default function ProfilePage() {
 
       {role === "STUDENT" && <StudentProfile data={profileData} />}
       {role === "TEACHER" && <TeacherProfile data={profileData} />}
-      {role === "USER" && <StudentProfile data={profileData} />}
       {role === "ADMIN" && <AdminProfile data={profileData} />}
     </main>
   );
@@ -101,20 +100,15 @@ function ProfileAvatar({
 
     try {
       setIsUploading(true);
+
       const formData = new FormData();
       formData.append("image", file);
 
-      // 👉 FIXED: credentials: "include" is active so your backend gets the auth cookies!
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/profiles/me/image`,
-        {
-          method: "PATCH",
-          credentials: "include",
-          body: formData,
-        },
-      );
+      // 👉 FIXED: Just call your service!
+      // httpClient automatically handles credentials/cookies based on your setup.
+      await profileService.uploadImage(formData);
 
-      if (!response.ok) throw new Error("Upload failed");
+      // Reload to show the fresh image
       window.location.reload();
     } catch (error) {
       console.error("Failed to upload image:", error);

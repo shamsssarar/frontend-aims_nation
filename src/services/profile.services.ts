@@ -6,4 +6,17 @@ export const profileService = {
 
     return response;
   },
+  uploadImage: async (formData: FormData) => {
+    const response = await httpClient.patch(
+      "/api/v1/profiles/me/image",
+      formData,
+      {
+        credentials: "include",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return response;
+  },
 };

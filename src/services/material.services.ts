@@ -18,6 +18,7 @@ export const materialService = {
       body: formData,
       // CRITICAL: We must include this so your better-auth teacher cookie is sent to the backend!
       credentials: "include",
+      
     });
 
     const data = await response.json();

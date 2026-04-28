@@ -20,11 +20,11 @@ export async function proxy(request: NextRequest) {
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
   // Scenario A: Unauthenticated user trying to access protected route
-  if (routeOwner !== null && !sessionCookie) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
+  // if (routeOwner !== null && !sessionCookie) {
+  //   const loginUrl = new URL("/login", request.url);
+  //   loginUrl.searchParams.set("callbackUrl", pathname);
+  //   return NextResponse.redirect(loginUrl);
+  // }
 
   // Scenario B: Logged In User
   if (sessionCookie) {

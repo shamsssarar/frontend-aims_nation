@@ -37,10 +37,10 @@ const navItems = [
     allowedRoles: ["STUDENT", "TEACHER", "ADMIN", "USER"],
   },
   {
-    title: "Settings",
-    url: "/dashboard/settings",
+    title: "My-Profile",
+    url: "/my-profile",
     icon: Settings,
-    allowedRoles: ["STUDENT", "TEACHER", "ADMIN", "USER"],
+    allowedRoles: ["STUDENT", "TEACHER", "ADMIN"],
   },
 
   // 👉 Student Links
@@ -110,7 +110,6 @@ const navItems = [
   },
 ];
 
-
 export function AppSidebar() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -118,7 +117,7 @@ export function AppSidebar() {
 
   const handleLogout = async () => {
     await authClient.signOut();
-    router.push("/login");
+    window.location.href = "/login";
   };
 
   const userRole = (session?.user as any)?.role?.toUpperCase() || "STUDENT";

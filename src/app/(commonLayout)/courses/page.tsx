@@ -104,7 +104,7 @@ export default function PublicCoursesPage() {
   ) => {
     if (!session?.user)
       return router.push(`/login?redirect=/checkout/${courseId}`);
-    if (isEnrolled) return router.push(`/dashboard/courses/${courseId}`);
+    if (isEnrolled) return router.push(`/dashboard/my-courses`);
     if (role === "TEACHER")
       return router.push(`/teacher/dashboard/classes/${courseId}`);
     if (role === "ADMIN") return router.push(`/admin/dashboard`);

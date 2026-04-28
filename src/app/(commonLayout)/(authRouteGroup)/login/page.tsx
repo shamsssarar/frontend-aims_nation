@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { signIn } from "@/lib/authClient"; // Your better-auth client
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { signIn, useSession } from "@/lib/authClient"; // Your better-auth client
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +25,34 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const { data: session } = useSession();
+
+  // 👉 2. The Auto-Teleport: If they have a session, push them out of the login page!
+  useEffect(() => {
+    if (session) {
+      // If the URL has a callbackUrl (like ?callbackUrl=/dashboard), send them there.
+      // Otherwise, default to /dashboard.
+      const destination = searchParams.get("callbackUrl") || "/dashboard";
+      router.push(destination);
+    }
+  }, [session, router, searchParams]);
+
+  
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      // event.persisted is true if the page was restored from the browser cache
+      if (event.persisted) {
+        setIsLoading(false);
+        setIsGoogleLoading(false);
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+    };
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,10 +78,11 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     setError("");
+
     try {
       await signIn.social({
         provider: "google",
-        callbackURL: "http://localhost:3000/dashboard", // Where they go after Google approves
+        callbackURL: "https://aims-nation-frontend.vercel.app/dashboard", // Where they go after Google approves
       });
     } catch (err) {
       console.error("Google login failed:", err);

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { authClient } from "@/lib/authClient";
+import { authClient, useSession } from "@/lib/authClient";
 import {
   Card,
   CardContent,
@@ -35,6 +35,32 @@ function RegisterForm() {
     dateOfBirth: "",
   });
 
+  const { data: session } = useSession();
+
+  // 👉 2. The Auto-Teleport: If they have a session, push them out of the login page!
+  useEffect(() => {
+    if (session) {
+      // If the URL has a callbackUrl (like ?callbackUrl=/dashboard), send them there.
+      // Otherwise, default to /dashboard.
+      const destination = searchParams.get("callbackUrl") || "/dashboard";
+      router.push(destination);
+    }
+  }, [session, router, searchParams]);
+
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      // event.persisted is true if the page was restored from the browser cache
+      if (event.persisted) {
+        setIsLoading(false);
+        setIsGoogleLoading(false);
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+    };
+  }, []);
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -79,7 +105,7 @@ function RegisterForm() {
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "http://localhost:3000/dashboard",
+        callbackURL: "https://aims-nation-frontend.vercel.app/dashboard",
       });
     } catch (error) {
       console.error("Google signup failed:", error);

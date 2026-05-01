@@ -3,6 +3,8 @@ import { Hero } from "@/components/home/Hero";
 import { UniverseOfLearning } from "@/components/home/UniverseOfLearning";
 import { WhyChooseUs } from "@/components/home/WhyChooseUs";
 import { FinalCTA } from "@/components/home/FinalCTA";
+import EcosystemJourney from "@/components/home/EcosystemJourney";
+import FutureBentoGrid from "@/components/home/FutureBentoGrid";
 
 export default function LandingPage() {
   return (
@@ -10,6 +12,8 @@ export default function LandingPage() {
       {/* Default behavior (frosted glass) */}
 
       <Hero />
+      <EcosystemJourney />
+      <FutureBentoGrid />
       <UniverseOfLearning />
       <WhyChooseUs />
       <FinalCTA />

@@ -3,9 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import AiTutor from "@/components/shared/AiTutor";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 
 // 👉 STEP 1: Import your new AI component
- 
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,13 +38,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Navbar transparent={true} />
           {/* This renders whatever page the user is currently on */}
           {children}
-
+          <Footer />
           {/* 👉 STEP 2: The Omnipresent Widget! */}
           {/* Because it's outside of {children}, it will float on top of every route. */}
           <AiTutor />
-          
         </ThemeProvider>
       </body>
     </html>

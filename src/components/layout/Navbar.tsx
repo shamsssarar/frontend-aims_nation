@@ -95,8 +95,8 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
           </span>
         </Link>
         {/* DESKTOP LINKS */}
-        <div className="hidden md:flex gap-8 font-medium text-slate-600 dark:text-slate-300">
-          {["Courses", "Contact", "Careers"].map((item) => (
+        <div className="hidden md:flex gap-8 font-medium text-slate-600 dark:text-slate-300 lg:ml-10">
+          {["Courses", "Contact", "About", "Careers"].map((item) => (
             <Link
               key={item}
               href={`/${item.toLowerCase()}`}
@@ -225,7 +225,7 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
         <div className="md:hidden absolute top-20 left-0 w-full bg-white dark:bg-slate-950 border-b border-slate-100 dark:border-slate-800 shadow-xl flex flex-col px-6 py-4 animate-in slide-in-from-top-2">
           {/* Mobile Main Links */}
           <div className="flex flex-col gap-4 border-b border-slate-100 dark:border-slate-800 pb-6 mb-4">
-            {["Courses", "Contact", "Careers"].map((item) => (
+            {["Courses", "Contact", "About", "Careers"].map((item) => (
               <Link
                 key={item}
                 href={`/${item.toLowerCase()}`}

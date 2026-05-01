@@ -114,7 +114,7 @@ export default function PublicCoursesPage() {
   const categories = ["All", "Robotics", "Arts", "Academics", "Culinary"];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 sm:px-6 lg:px-8 mt-20">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* HERO SECTION */}
         <div className="text-center space-y-4 max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">

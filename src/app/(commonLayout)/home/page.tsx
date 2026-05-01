@@ -7,14 +7,15 @@ import { FinalCTA } from "@/components/home/FinalCTA";
 import { Footer } from "@/components/layout/Footer";
 import EcosystemJourney from "@/components/home/EcosystemJourney";
 import FutureBentoGrid from "@/components/home/FutureBentoGrid";
+import AiMSPreloader from "@/components/shared/AiMSPreloader";
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-[#FDFDF9] selection:bg-[#E8AD31] selection:text-white overflow-hidden">
+    <main className="min-h-screen bg-[#FDFDF9] selection:bg-[#E8AD31] selection:text-white overflow-hidden mt-20">
       
       <Hero />
       <EcosystemJourney />
-      <FutureBentoGrid/>
+      <FutureBentoGrid />
       <UniverseOfLearning />
       <WhyChooseUs />
       <FinalCTA />

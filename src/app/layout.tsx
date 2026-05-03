@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import AiTutor from "@/components/shared/AiTutor";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import AiMSPreloader from "@/components/shared/AimsPreloader";
+import AiMSPreloader from "@/components/shared/AiMSPreloader";
 
 // 👉 STEP 1: Import your new AI component
 

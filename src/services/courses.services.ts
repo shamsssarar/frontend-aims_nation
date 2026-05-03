@@ -35,4 +35,12 @@ export const courseService = {
     const response = await httpClient.post("/api/v1/courses", payload);
     return response;
   },
+
+  getRecommendations: async (courseId: string) => {
+    // Adjust the URL based on your actual Axios/Fetch setup
+    const response = await httpClient.get(
+      `/api/v1/courses/${courseId}/recommendations`,
+    );
+    return response;
+  },
 };

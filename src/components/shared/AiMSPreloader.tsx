@@ -34,7 +34,7 @@ export default function AiMSPreloader() {
     if (words[index] === "_LOGO_") {
       delayTime = 1000; // Hold the logo on screen for 1 second
     } else if (words[index] === "AIMS NATION") {
-      delayTime = 1200; // Hold the final brand name for 1.4 seconds
+      delayTime = 1000; // Hold the final brand name for 1.4 seconds
     }
 
     // The Sequence Logic

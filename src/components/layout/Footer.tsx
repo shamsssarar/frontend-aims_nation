@@ -14,7 +14,7 @@ export function Footer() {
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* --- MAIN FOOTER GRID --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 lg:gap-8 mb-16 border-b border-slate-800/60 pb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16 border-b border-slate-800/60 pb-16">
           {/* Column 1 & 2: Brand & Newsletter */}
           <div className="lg:col-span-2 space-y-8">
             <div className="flex items-center gap-3">
@@ -55,47 +55,9 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Column 3: Platform */}
-          <div className="lg:col-span-1">
-            <h4 className="text-white font-semibold mb-6">Platform</h4>
-            <ul className="space-y-4 text-sm text-slate-400">
-              <li>
-                <Link
-                  href="/courses"
-                  className="hover:text-white transition-colors"
-                >
-                  Course Catalog
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/robotics"
-                  className="hover:text-white transition-colors"
-                >
-                  Robotics Lab
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/ai-tutor"
-                  className="hover:text-white transition-colors"
-                >
-                  AI Assistant
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/login"
-                  className="hover:text-white transition-colors"
-                >
-                  Student Portal
-                </Link>
-              </li>
-            </ul>
-          </div>
 
           {/* Column 4: Company */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 w-fit">
             <h4 className="text-white font-semibold mb-6">Company</h4>
             <ul className="space-y-4 text-sm text-slate-400">
               <li>
@@ -125,19 +87,11 @@ export function Footer() {
                   Contact
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/blog"
-                  className="hover:text-white transition-colors"
-                >
-                  Blog
-                </Link>
-              </li>
             </ul>
           </div>
 
           {/* Column 5: Contact Info */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1 bg- w-fit">
             <h4 className="text-white font-semibold mb-6">Get in Touch</h4>
             <ul className="space-y-5 text-sm text-slate-400">
               {/* Email Line */}
@@ -166,28 +120,16 @@ export function Footer() {
             {/* Social Icons */}
             <div className="flex gap-4 mt-8">
               <Link
-                href="#"
+                href="https://www.facebook.com/profile.php?id=61577507590078"
                 className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-[#6A8D52] hover:text-white hover:border-[#6A8D52] transition-all"
               >
                 <FaFacebook className="w-4 h-4" />
               </Link>
               <Link
-                href="#"
+                href="https://www.instagram.com/aims_nation/"
                 className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-[#E8AD31] hover:text-white hover:border-[#E8AD31] transition-all"
               >
                 <FaInstagram className="w-4 h-4" />
-              </Link>
-              <Link
-                href="#"
-                className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all"
-              >
-                <LiaLinkedin className="w-4 h-4" />
-              </Link>
-              <Link
-                href="#"
-                className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-all"
-              >
-                <FaTwitter className="w-4 h-4" />
               </Link>
             </div>
           </div>
@@ -205,12 +147,6 @@ export function Footer() {
             </Link>
             <Link href="/terms" className="hover:text-white transition-colors">
               Terms of Service
-            </Link>
-            <Link
-              href="/cookies"
-              className="hover:text-white transition-colors"
-            >
-              Cookie Settings
             </Link>
           </div>
         </div>

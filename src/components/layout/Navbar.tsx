@@ -95,7 +95,7 @@ export function Navbar({ transparent = true }: { transparent?: boolean }) {
           </span>
         </Link>
         {/* DESKTOP LINKS */}
-        <div className="hidden md:flex gap-8 font-medium text-slate-600 dark:text-slate-300 lg:ml-10">
+        <div className="hidden md:flex gap-8 font-medium text-slate-600 dark:text-slate-300 lg:ml-12">
           {["Courses", "Contact", "About", "Careers"].map((item) => (
             <Link
               key={item}

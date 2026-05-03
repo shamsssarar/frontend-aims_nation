@@ -5,7 +5,7 @@ import { WhyChooseUs } from "@/components/home/WhyChooseUs";
 import { FinalCTA } from "@/components/home/FinalCTA";
 import EcosystemJourney from "@/components/home/EcosystemJourney";
 import FutureBentoGrid from "@/components/home/FutureBentoGrid";
-import AiMSPreloader from "@/components/shared/AiMSPreloader";
+import AiMSPreloader from "@/components/shared/AimsPreloader";
 
 export default function LandingPage() {
   return (

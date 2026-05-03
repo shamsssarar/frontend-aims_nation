@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2, GraduationCap } from "lucide-react";
 import { httpClient } from "@/lib/axios/httpClient";
+import Image from "next/image";
 
 function RegisterForm() {
   const router = useRouter();
@@ -115,12 +116,20 @@ function RegisterForm() {
   };
 
   return (
-    <Card className="w-full border-none shadow-none sm:border sm:shadow-sm">
+    <Card className="w-full border-none shadow-none sm:border sm:shadow-sm mt-18">
       <CardHeader className="space-y-1 text-center pb-6">
-        <div className="flex justify-center mb-2">
-          <GraduationCap className="h-10 w-10 text-primary" />
+        <div className="flex justify-center mb-[-5px]">
+          <Link href="/">
+            <Image
+              src="/logo2.png"
+              alt="Logo"
+              width={80}
+              height={80}
+              className="h-20 w-auto object-contain"
+            />
+          </Link>
         </div>
-        <CardTitle className="text-2xl font-bold tracking-tight text-primary">
+        <CardTitle className="text-2xl font-bold tracking-tight text-primary mb-2">
           Join AiMS Nation
         </CardTitle>
         <CardDescription className="text-slate-500">

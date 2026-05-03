@@ -26,6 +26,7 @@ import {
 import Image from "next/image";
 import { enrollmentService } from "@/services/enrollment.services";
 import { ICourseQuery } from "@/types/course.types";
+import Link from "next/link";
 
 export default function PublicCoursesPage() {
   const [courses, setCourses] = useState<any[]>([]);
@@ -40,7 +41,13 @@ export default function PublicCoursesPage() {
 
   const router = useRouter();
   const { data: session } = useSession();
-
+  const categoryKeywords: Record<string, string[]> = {
+    Robotics: ["Robotic", "Robotics", "Arduino"],
+    Arts: ["Art", "Craft", "Drawing", "Painting"],
+    Academics: ["Math", "Science", "English", "Physics"],
+    Culinary: ["Cooking", "Baking", "Food"],
+  };
+  // 👉 2. The Smart Fetcher with Debouncing
   // 👉 2. The Smart Fetcher with Debouncing
   useEffect(() => {
     const fetchData = async () => {
@@ -48,34 +55,45 @@ export default function PublicCoursesPage() {
       try {
         const userRole = (session?.user as any)?.role?.toUpperCase();
 
-        // Dynamically build the query object based on our React state
         const query: ICourseQuery = {};
         if (searchQuery) query.searchTerm = searchQuery;
-        if (selectedCategory !== "All") {
-          // If there's already a search, combine them. Otherwise, just use the category word.
-          query.searchTerm = query.searchTerm
-            ? `${query.searchTerm} ${selectedCategory}`
-            : selectedCategory;
-        }
-
         if (sortOption) query.sort = sortOption;
 
+        // We do NOT add selectedCategory to query.searchTerm anymore.
+
         const [coursesRes, myEnrollments] = await Promise.all([
-          courseService.getAllCourses(query), // Send the query to the backend!
+          courseService.getAllCourses(query),
           userRole === "STUDENT"
             ? enrollmentService.getMyEnrollments()
             : Promise.resolve([]),
         ]);
 
-        // Safely extract the data array from the paginated response
         let coursesArray = [];
-        if (Array.isArray(coursesRes)) {
-          coursesArray = coursesRes; // If your httpClient already unwrapped it
-        } else if (Array.isArray(coursesRes?.data)) {
-          coursesArray = coursesRes.data; // If it's wrapped in your sendResponse format
-        } else if (Array.isArray((coursesRes as any)?.data?.data)) {
-          coursesArray = (coursesRes as any).data.data; // If it's wrapped in Axios + sendResponse
+        if (Array.isArray(coursesRes)) coursesArray = coursesRes;
+        else if (Array.isArray(coursesRes?.data))
+          coursesArray = coursesRes.data;
+        else if (Array.isArray((coursesRes as any)?.data?.data))
+          coursesArray = (coursesRes as any).data.data;
+
+        // 👉 NEW: Frontend Category Filtering
+        // 👉 NEW: Frontend Category Filtering
+        if (selectedCategory !== "All") {
+          const keywords = categoryKeywords[selectedCategory] || [
+            selectedCategory,
+          ];
+          coursesArray = coursesArray.filter((course: any) => {
+            // <-- ADD ': any' HERE
+            const title = course.title.toLowerCase();
+            const desc = (course.description || "").toLowerCase();
+            // Check if ANY of the keywords exist in the title or description
+            return keywords.some(
+              (keyword) =>
+                title.includes(keyword.toLowerCase()) ||
+                desc.includes(keyword.toLowerCase()),
+            );
+          });
         }
+
         setCourses(coursesArray);
 
         if (myEnrollments && myEnrollments.length > 0) {
@@ -89,7 +107,6 @@ export default function PublicCoursesPage() {
       }
     };
 
-    // Debounce the search input by 300ms so we don't spam the API
     const timeoutId = setTimeout(() => {
       fetchData();
     }, 300);
@@ -218,8 +235,8 @@ export default function PublicCoursesPage() {
                   </div>
 
                   <CardContent className="flex-grow p-6 space-y-4">
-                    <CardTitle className="text-xl line-clamp-2 leading-tight group-hover:text-[#6A8D52] transition-colors">
-                      {course.title}
+                    <CardTitle className="text-xl line-clamp-2 leading-tight group-hover:text-[#6A8D52] transition-colors cursor-pointer">
+                      <Link href={`/courses/${course.id}`}>{course.title}</Link>
                     </CardTitle>
                     <div className="flex flex-col gap-2 pt-2">
                       <div className="flex items-center text-sm text-slate-600 dark:text-slate-400">

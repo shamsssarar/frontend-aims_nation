@@ -8,7 +8,7 @@
 A premium, highly animated, AI-driven educational platform built with Next.js 16, React 19, and Tailwind CSS v4.
 </p>
 
-🔗 [View Live Project](https://aims-nation.vercel.app/)
+🔗 [View Live Project](https://aims-nation-frontend.vercel.app/)
 
 ---
 

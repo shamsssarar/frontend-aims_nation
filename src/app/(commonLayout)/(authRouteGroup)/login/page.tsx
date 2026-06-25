@@ -38,7 +38,6 @@ export default function LoginPage() {
     }
   }, [session, router, searchParams]);
 
-  
   useEffect(() => {
     const handlePageShow = (event: PageTransitionEvent) => {
       // event.persisted is true if the page was restored from the browser cache
@@ -94,7 +93,7 @@ export default function LoginPage() {
     try {
       await signIn.social({
         provider: "google",
-        callbackURL: "https://aims-nation-frontend.vercel.app/dashboard", // Where they go after Google approves
+        callbackURL: "/dashboard", // Where they go after Google approves
       });
     } catch (err) {
       console.error("Google login failed:", err);
@@ -104,7 +103,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4 pt-24">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -122,7 +121,7 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-<div className="flex flex-col gap-3 mb-6">
+            <div className="flex flex-col gap-3 mb-6">
               <Button
                 type="button"
                 variant="outline"

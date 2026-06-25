@@ -21,11 +21,15 @@ export default function AiMSPreloader() {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    const hasSeenPreloader = sessionStorage.getItem("aims_preloader_seen");
+    if (hasSeenPreloader) {
+      setShow(false);
+    }
     setIsMounted(true);
   }, []);
 
   useEffect(() => {
-    if (!isMounted) return;
+    if (!isMounted || !show) return;
 
     // --- DYNAMIC TIMING LOGIC ---
     // We want the logo and the final name to stay on screen longer than the rapid flash words
@@ -47,6 +51,7 @@ export default function AiMSPreloader() {
       // When the sequence ends, drop the curtain
       const timer = setTimeout(() => {
         setShow(false);
+        sessionStorage.setItem("aims_preloader_seen", "true");
       }, delayTime);
       return () => clearTimeout(timer);
     }

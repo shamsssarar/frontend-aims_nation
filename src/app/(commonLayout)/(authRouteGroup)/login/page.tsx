@@ -54,6 +54,18 @@ export default function LoginPage() {
     };
   }, []);
 
+  // --- NEW: Demo Credentials Helper ---
+  const fillDemoCredentials = (role: "ADMIN" | "TEACHER") => {
+    if (role === "ADMIN") {
+      setEmail("aimsnation.bd@gmail.com");
+      setPassword("password123");
+    } else {
+      setEmail("shamssarar27@gmail.com");
+      setPassword("AimsNation2026!");
+    }
+  };
+  // ------------------------------------
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -110,6 +122,37 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+<div className="flex flex-col gap-3 mb-6">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full text-xs text-primary hover:bg-primary/5 hover:text-primary border-primary/20"
+                onClick={() => fillDemoCredentials("ADMIN")}
+              >
+                Demo Admin
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full text-xs text-secondary hover:bg-secondary/5 hover:text-secondary border-secondary/20"
+                onClick={() => fillDemoCredentials("TEACHER")}
+              >
+                Demo Teacher
+              </Button>
+            </div>
+
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-slate-200 dark:border-slate-800" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white dark:bg-slate-950 px-2 text-slate-500">
+                  Or login manually
+                </span>
+              </div>
+            </div>
+            {/* ------------------------- */}
+
             <form onSubmit={handleLogin} className="space-y-4">
               {error && (
                 <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">

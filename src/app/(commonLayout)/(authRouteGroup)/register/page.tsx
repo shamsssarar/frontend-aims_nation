@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, GraduationCap } from "lucide-react";
 import { httpClient } from "@/lib/axios/httpClient";
 import Image from "next/image";
+import { studentServices } from "@/services/student.services";
 
 function RegisterForm() {
   const router = useRouter();
@@ -67,6 +68,7 @@ function RegisterForm() {
     setIsLoading(true);
 
     try {
+      // 1. better-auth creates the user AND the backend hook creates a blank Student profile
       const { data, error } = await authClient.signUp.email({
         email: formData.email,
         password: formData.password,
@@ -78,20 +80,26 @@ function RegisterForm() {
         setIsLoading(false);
         return;
       }
+
+      // 2. The session cookie is now set! We immediately send a PATCH/PUT request
+      // to UPDATE the blank profile with the rest of the form data.
       try {
-        await httpClient.post("/api/v1/profiles/setup-student", {
-          contactNo: formData.contactNo,
-          schoolGrade: formData.schoolGrade,
-          dateOfBirth: formData.dateOfBirth
-            ? new Date(formData.dateOfBirth).toISOString()
-            : undefined,
-        });
+        // 'data.user.id' is securely returned by better-auth the second the account is made
+        if (data?.user?.id) {
+          await studentServices.updateStudent(data.user.id, {
+            contactNo: formData.contactNo,
+            schoolGrade: formData.schoolGrade,
+            dateOfBirth: formData.dateOfBirth
+              ? new Date(formData.dateOfBirth).toISOString()
+              : undefined,
+          });
+        }
       } catch (profileError) {
-        console.error(
-          "Profile creation failed, but user was created:",
-          profileError,
-        );
+        // We log this, but we don't stop the login process if it fails.
+        console.error("Profile update failed:", profileError);
       }
+
+      // 3. Teleport them to the dashboard!
       router.push(redirectUrl);
     } catch (error) {
       console.error("Registration error:", error);
